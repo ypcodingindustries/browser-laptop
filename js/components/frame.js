@@ -327,7 +327,6 @@ class Frame extends ImmutableComponent {
   componentDidMount () {
     const cb = () => {
       this.webview.setActive(this.props.isActive)
-      this.webview.setAudioMuted(this.props.audioMuted || false)
       this.updateAboutDetails()
     }
     this.updateWebview(cb)
@@ -403,7 +402,6 @@ class Frame extends ImmutableComponent {
           this.exitHtmlFullScreen()
         }
       }
-      this.webview.setAudioMuted(this.props.audioMuted || false)
       this.updateAboutDetails()
     }
 
