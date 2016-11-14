@@ -211,7 +211,8 @@ module.exports.getObjectById = (objectId, category) => {
   switch (category) {
     case 'BOOKMARKS':
     case 'HISTORY_SITES':
-      return appState.get('sites').findEntry((site, index) => {
+      // For info on siteKey see: siteUtil.js getSiteKey()
+      return appState.get('sites').findEntry((site, _siteKey) => {
         const itemObjectId = site.get('objectId')
         return (itemObjectId && itemObjectId.equals(objectId))
       })

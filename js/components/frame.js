@@ -97,7 +97,7 @@ class Frame extends ImmutableComponent {
       this.webview.send(messages.BRAVERY_DEFAULTS_UPDATED, this.braveryDefaults)
     } else if (location === 'about:bookmarks') {
       this.webview.send(messages.BOOKMARKS_UPDATED, {
-        bookmarks: this.props.bookmarks.toJS(),
+        bookmarks: this.props.bookmarks.toList().sort(siteUtil.siteSort).toJS(),
         bookmarkFolders: this.props.bookmarkFolders.toJS()
       })
     } else if (location === 'about:history') {

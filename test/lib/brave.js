@@ -319,12 +319,14 @@ var exports = {
       })
     })
 
-    this.app.client.addCommand('waitForSiteEntry', function (location) {
-      logVerbose('waitForSiteEntry(' + location + ')')
+    this.app.client.addCommand('waitForSiteEntry', function (location, waitForTitle = true) {
+      logVerbose('waitForSiteEntry(' + location + ', ' + waitForTitle + ')')
       return this.waitUntil(function () {
         return this.getAppState().then((val) => {
-          const ret = val.value && val.value.sites && val.value.sites.find((site) => site.location === location)
-          logVerbose('waitForSiteEntry("' + location + '") => ' + ret)
+          const ret = val.value && val.value.sites && Array.from(Object.values(val.value.sites)).find(
+            (site) => site.location === location &&
+              (!waitForTitle || waitForTitle && site.title))
+          logVerbose('waitForSiteEntry("' + location + ', ' + waitForTitle + '") => ' + ret)
           return ret
         })
       })
