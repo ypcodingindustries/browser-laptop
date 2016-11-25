@@ -14,7 +14,7 @@ chai.use(chaiAsPromised)
 const Server = require('./server')
 
 // toggle me for more verbose logs! :)
-const logVerboseEnabled = false
+const logVerboseEnabled = true
 const logVerbose = (string) => {
   if (logVerboseEnabled) {
     console.log(string)
