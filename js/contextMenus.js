@@ -9,10 +9,10 @@ const Immutable = require('immutable')
 const clipboard = remote.clipboard
 const messages = require('./constants/messages')
 const windowStore = require('./stores/windowStore')
+const appActions = require('./actions/appActions')
 const windowActions = require('./actions/windowActions')
 const webviewActions = require('./actions/webviewActions')
 const bookmarkActions = require('./actions/bookmarkActions')
-const appActions = require('./actions/appActions')
 const siteTags = require('./constants/siteTags')
 const electronDownloadItemActions = require('../app/common/constants/electronDownloadItemActions')
 const dragTypes = require('./constants/dragTypes')
@@ -514,7 +514,7 @@ function tabTemplateInit (frameProps) {
         label: locale.translation(isPinned ? 'unpinTab' : 'pinTab'),
         click: (item) => {
           // Handle converting the current tab window into a pinned site
-          windowActions.setPinned(frameProps, !isPinned)
+          appActions.tabPinned(frameProps.get('tabId'), !isPinned)
         }
       })
     }

@@ -24,7 +24,7 @@ describe('pinnedTabs', function () {
         .waitForUrl(this.page1Url)
         .windowByUrl(Brave.browserWindowUrl)
         .waitForExist('.tab[data-frame-key="2"]')
-        .setPinned(this.page1Url, true)
+        .pinTabByIndex(1, true)
         .waitForExist(pinnedTabsTabs)
         .waitUntil(function () {
           return this.elements(pinnedTabsTabs).then((res) => res.value.length === 1)
@@ -39,7 +39,7 @@ describe('pinnedTabs', function () {
     })
     it('unpins and creates a non-pinned tab', function * () {
       yield this.app.client
-        .setPinned(this.page1Url, false)
+        .pinTabByIndex(1, false)
         .waitForExist('.tab:not(.isPinned)[data-frame-key="2"]')
         .waitUntil(function () {
           return this.elements(pinnedTabsTabs).then((res) => res.value.length === 0)
@@ -54,7 +54,7 @@ describe('pinnedTabs', function () {
         .waitForUrl(this.page1Url)
         .windowByUrl(Brave.browserWindowUrl)
         .waitForExist('.tab[data-frame-key="3"]')
-        .setPinned(this.page1Url, true)
+        .pinTabByIndex(2, true)
         .waitUntil(function () {
           return this.elements(pinnedTabsTabs).then((res) => res.value.length === 1)
         })
@@ -74,7 +74,7 @@ describe('pinnedTabs', function () {
         .waitForUrl(this.page1Url)
         .windowByUrl(Brave.browserWindowUrl)
         .waitForExist('.tab[data-frame-key="2"]')
-        .setPinned(this.page1Url, true)
+        .pinTabByIndex(1, true)
         .waitForExist(pinnedTabsTabs)
         .waitUntil(function () {
           return this.elements(pinnedTabsTabs).then((res) => res.value.length === 1)
@@ -84,7 +84,7 @@ describe('pinnedTabs', function () {
         })
         .ipcSend(messages.SHORTCUT_NEW_FRAME, this.page1Url, {partitionNumber: 1})
         .waitForExist('.tab[data-frame-key="3"]')
-        .setPinned(this.page1Url, true, {partitionNumber: 1})
+        .pinTabByIndex(2, true)
         .waitUntil(function () {
           return this.elements(pinnedTabsTabs).then((res) => res.value.length === 2)
         })
@@ -163,7 +163,7 @@ describe('pinnedTabs', function () {
         .waitForUrl(this.page1Url)
         .windowByUrl(Brave.browserWindowUrl)
         .waitForExist('.tab[data-frame-key="2"]')
-        .setPinned(this.page1Url, true)
+        .pinTabByIndex(1, true)
         .waitForExist(pinnedTabsTabs)
     })
     it('navigate within the same origin', function * () {
@@ -207,13 +207,14 @@ describe('pinnedTabs', function () {
         .waitForUrl(page1Url)
         .windowByUrl(Brave.browserWindowUrl)
         .waitForExist('.tab[data-frame-key="2"]')
-        .setPinned(page1Url, true)
+        .pinTabByIndex(1, true)
         .waitForExist(pinnedTabsTabs)
         .ipcSend(messages.SHORTCUT_NEW_FRAME, page2Url)
         .waitForUrl(page2Url)
         .windowByUrl(Brave.browserWindowUrl)
         .waitForExist('.tab[data-frame-key="3"]')
-        .setPinned(page2Url, true)
+        .pinTabByIndex(2, true)
+        .waitForExist(pinnedTabsTabs)
         .waitForExist(pinnedTabsTabs)
         .waitUntil(function () {
           return this.elements(pinnedTabsTabs).then((res) => res.value.length === 2)

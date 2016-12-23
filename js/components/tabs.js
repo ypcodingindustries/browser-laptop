@@ -7,6 +7,7 @@ const ReactDOM = require('react-dom')
 
 const ImmutableComponent = require('./immutableComponent')
 
+const appActions = require('../actions/appActions')
 const windowActions = require('../actions/windowActions')
 const windowStore = require('../stores/windowStore')
 const dragTypes = require('../constants/dragTypes')
@@ -61,7 +62,7 @@ class Tabs extends ImmutableComponent {
           const droppedOnFrameProps = windowStore.getFrame(droppedOnTab.props.tab.get('frameKey'))
           windowActions.moveTab(sourceDragData, droppedOnFrameProps, isLeftSide)
           if (sourceDragData.get('pinnedLocation')) {
-            windowActions.setPinned(sourceDragData, false)
+            appActions.tabPinned(sourceDragData.get('tabId'), false)
           }
         }
       }, 0)

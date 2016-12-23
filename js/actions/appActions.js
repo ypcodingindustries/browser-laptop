@@ -787,8 +787,19 @@ const appActions = {
       tabId,
       options
     })
-  }
+  },
 
+  /**
+   * Dispatches a message when a tab is being pinned
+   * @param {number} tabId - The tabId of the tab to pin
+   */
+  tabPinned: function (tabId, pinned) {
+    AppDispatcher.dispatch({
+      actionType: appConstants.APP_TAB_PINNED,
+      tabId,
+      pinned
+    })
+  }
 }
 
 module.exports = appActions

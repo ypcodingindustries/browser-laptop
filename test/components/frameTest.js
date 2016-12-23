@@ -211,7 +211,7 @@ describe('frame tests', function () {
 
     it('open from pinned tab', function * () {
       yield this.app.client
-        .setPinned(this.url, true)
+        .pinTabByIndex(1, true)
         .waitUntil(function () {
           return this.elements(pinnedTabsTabs).then((res) => res.value.length === 1)
         })

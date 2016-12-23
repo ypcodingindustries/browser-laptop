@@ -3,7 +3,7 @@ const messages = require('../..//js/constants/messages')
 const Immutable = require('immutable')
 const tabState = require('../common/state/tabState')
 const {app, extensions} = require('electron')
-const { makeImmutable } = require('../common/state/immutableUtil')
+const {makeImmutable} = require('../common/state/immutableUtil')
 
 let currentWebContents = {}
 
@@ -197,6 +197,18 @@ const api = {
     if (tab && !tab.isDestroyed()) {
       tab.clone(options.toJS(), (newTab) => {
       })
+    }
+    return state
+  },
+
+  pin: (state, action) => {
+    action = makeImmutable(action)
+    const tabId = action.get('tabId')
+    // const pinned = action.get('pinned')
+    const tab = api.getWebContents(tabId)
+    if (tab && !tab.isDestroyed()) {
+      // TODO: Pin it!
+      console.log('todo')
     }
     return state
   },
