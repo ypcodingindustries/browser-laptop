@@ -938,4 +938,27 @@ describe('siteUtil', function () {
       assert.strictEqual(siteUtil.getOrigin('http://http/test'), 'http://http')
     })
   })
+
+  describe('getDetailFromTab', function () {
+    it('returns a properly formed siteDetail', function () {
+      const tab = Immutable.fromJS({
+        url: 'https://brave.com/2',
+        title: '3',
+        partition: 5,
+        icon: 'https://brave.com/11.ico',
+        color: '#000011'
+      })
+      assert.deepEqual(
+        siteUtil.getDetailFromTab(tab, siteTags.BOOKMARK).toJS(),
+        {
+          location: tab.get('url'),
+          title: tab.get('title'),
+          partitionNumber: tab.get('partition'),
+          tags: [siteTags.BOOKMARK],
+          favicon: 'https://brave.com/11.ico',
+          themeColor: '#000011'
+        }
+      )
+    })
+  })
 })

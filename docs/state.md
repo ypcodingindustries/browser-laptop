@@ -18,10 +18,14 @@ AppStore
     active: boolean,  // whether the tab is selected
     title: string,
     favIconUrl: string,
+    tabId: number,
     // session properties
     windowId: number,  // the windowId that contains the tab
     audible: boolean,  // is audio playing (muted or not)
     muted: boolean,  // is the tab muted
+    partition: number, // todo
+    icon: string, // todo
+    color: number // todo
   }],
   windows: [{
     // persistent properties

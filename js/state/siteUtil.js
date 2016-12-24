@@ -328,6 +328,17 @@ module.exports.getDetailFromFrame = function (frame, tag) {
   })
 }
 
+module.exports.getDetailFromTab = function (tab, tag) {
+  return Immutable.fromJS({
+    location: tab.get('url'),
+    title: tab.get('title'),
+    partitionNumber: tab.get('partition'), // TODO: I don't think we store this yet
+    tags: tag ? [tag] : [],
+    favicon: tab.get('icon'), // TODO: I don't think we store this yet
+    themeColor: tab.get('color') // TODO: I don't think we store this yet
+  })
+}
+
 /**
  * Update the favicon URL for all entries in the sites list
  * which match a given location. Currently, there should only be
