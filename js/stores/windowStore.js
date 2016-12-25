@@ -681,35 +681,6 @@ const doAction = (action) => {
       // Drag and drop bookmarks code expects this to be set sync
       windowStore.emitChanges()
       return
-    case windowConstants.WINDOW_SET_PINNED:
-      // Check if there's already a frame which is pinned.
-      // If so we just want to set it as active.
-      const location = action.frameProps.get('location')
-      const alreadyPinnedFrameProps = windowState.get('frames').find(
-        (frame) => frame.get('pinnedLocation') && frame.get('pinnedLocation') === location &&
-          (action.frameProps.get('partitionNumber') || 0) === (frame.get('partitionNumber') || 0))
-      if (alreadyPinnedFrameProps && action.isPinned) {
-        action.actionType = windowConstants.WINDOW_CLOSE_FRAME
-        doAction(action)
-        action.actionType = windowConstants.WINDOW_SET_ACTIVE_FRAME
-        action.frameProps = alreadyPinnedFrameProps
-        doAction(action)
-      } else {
-        windowState = windowState.setIn(['frames', frameStateUtil.getFramePropsIndex(windowState.get('frames'), action.frameProps), 'pinnedLocation'],
-          action.isPinned ? location : undefined)
-        windowState = windowState.setIn(['tabs', frameStateUtil.getFramePropsIndex(windowState.get('frames'), action.frameProps), 'pinnedLocation'],
-          action.isPinned ? location : undefined)
-      }
-      // Remove preview frame key when unpinning / pinning
-      // becuase it can get messed up.
-      windowState = windowState.merge({
-        previewFrameKey: null
-      })
-      windowState = windowState.deleteIn(['ui', 'tabs', 'previewTabPageIndex'])
-      // Pin changes need to happen right away or else a race condition could happen for app state
-      // change detection where it adds a second frame
-      windowStore.emitChanges()
-      return
     case windowConstants.WINDOW_SET_AUDIO_MUTED:
       windowState = windowState.setIn(['frames', frameStateUtil.getFramePropsIndex(windowState.get('frames'), action.frameProps), 'audioMuted'], action.muted)
       windowState = windowState.setIn(['tabs', frameStateUtil.getFramePropsIndex(windowState.get('frames'), action.frameProps), 'audioMuted'], action.muted)
