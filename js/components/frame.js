@@ -273,7 +273,7 @@ class Frame extends ImmutableComponent {
       guestInstanceId = this.props.guestInstanceId
       this.webview = document.createElement('webview')
       if (guestInstanceId) {
-        if (!this.webview.setGuestInstanceId(guestInstanceId)) {
+        if (!this.webview.attachGuest(guestInstanceId)) {
           console.error('could not set guestInstanceId ' + guestInstanceId)
           guestInstanceId = null
         }

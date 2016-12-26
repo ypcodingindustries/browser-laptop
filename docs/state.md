@@ -19,6 +19,7 @@ AppStore
     title: string,
     favIconUrl: string,
     tabId: number,
+    guestInstanceId: number,
     // session properties
     windowId: number,  // the windowId that contains the tab
     audible: boolean,  // is audio playing (muted or not)
@@ -67,7 +68,7 @@ AppStore
     location: string,
     title: string,
     customTitle: string, // User provided title for bookmark; overrides title
-    tags: [string], // empty, 'bookmark', 'bookmark-folder', 'pinned', or 'reader'
+    tags: [string], // empty, 'bookmark', 'bookmark-folder', or 'reader'
     favicon: string, // URL of the favicon
     themeColor: string, // css compatible color string
     lastAccessedTime: number, // datetime.getTime()

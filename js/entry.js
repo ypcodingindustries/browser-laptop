@@ -36,6 +36,9 @@ const Immutable = require('immutable')
 const patch = require('immutablepatch')
 const l10n = require('./l10n')
 
+// TODO: REMOVE
+window.appActions = require('./actions/appActions')
+
 try {
   // don't allow scaling or zooming of the ui
   webFrame.setPageScaleLimits(1, 1)
