@@ -27,6 +27,8 @@ const categoryMap = {
 
 let deviceId = null /** @type {Array|null} */
 let pollIntervalId = null
+let appInitialized = false
+const appInitCallbacks = [] /** @type {Array.Function} */
 
 /**
  * Gets current time in seconds
@@ -200,11 +202,35 @@ const doAction = (sender, action) => {
 }
 
 /**
+ * Calls a function after APP_INITIALIZED has been emitted.
+ * @param {Function} fn
+ */
+const onAppInitialized = (fn) => {
+  if (appInitialized) {
+    fn()
+  } else {
+    appInitCallbacks.push(fn)
+  }
+}
+
+/**
+ * Called when sync client wants browser to save sync init data.
+ * @param {Uint8Array?} seed
+ * @param {Uint8Array?} newDeviceId
+ */
+const onSaveInitData = (seed, newDeviceId) => {
+  if (!deviceId && newDeviceId) {
+    deviceId = Array.from(newDeviceId)
+  }
+  appActions.saveSyncInitData(seed, newDeviceId)
+}
+
+/**
  * Called when sync client is done initializing.
  * @param {boolean} isFirstRun - whether this is the first time sync is running
  * @param {Event} e
  */
-module.exports.onSyncReady = (isFirstRun, e) => {
+const onSyncReady = (isFirstRun, e) => {
   appDispatcher.register(doAction.bind(null, e.sender))
   if (isFirstRun) {
     // Sync the device id for this device
@@ -240,7 +266,7 @@ module.exports.onSyncReady = (isFirstRun, e) => {
     // RESOLVE_SYNC_RECORDS, handle RESOLVED_SYNC_RECORDS
   })
   // Periodically poll for new records
-  let startAt = appState.getIn(['sync', 'lastFetchTimestamp']) || 0
+  let startAt = appState.getIn(['sync', 'lastFetchTimestamp'])
   const poll = () => {
     e.sender.send(messages.FETCH_SYNC_RECORDS, categoryNames, startAt)
     startAt = now()
@@ -251,7 +277,7 @@ module.exports.onSyncReady = (isFirstRun, e) => {
 }
 
 module.exports.init = function (initialState) {
-  if (config.enabled !== true) {
+  if (initialState.enabled !== true) {
     return
   }
   ipcMain.on(messages.GET_INIT_DATA, (e) => {
@@ -261,13 +287,12 @@ module.exports.init = function (initialState) {
     e.sender.send(messages.GOT_INIT_DATA, seed, deviceId, config)
   })
   ipcMain.on(messages.SAVE_INIT_DATA, (e, seed, newDeviceId) => {
-    if (!deviceId && newDeviceId) {
-      deviceId = Array.from(newDeviceId)
-    }
-    appActions.saveSyncInitData(seed, newDeviceId)
+    onAppInitialized(onSaveInitData.bind(null, seed, newDeviceId))
   })
-  ipcMain.on(messages.SYNC_READY, module.exports.onSyncReady.bind(null,
-    !initialState.seed && !initialState.deviceId))
+  ipcMain.on(messages.SYNC_READY, (e) => {
+    onAppInitialized(onSyncReady.bind(null,
+      !initialState.seed && !initialState.deviceId, e))
+  })
   ipcMain.on(messages.SYNC_DEBUG, (e, msg) => {
     console.log('sync-client:', msg)
   })
@@ -276,3 +301,8 @@ module.exports.init = function (initialState) {
 module.exports.stop = function () {
   clearInterval(pollIntervalId)
 }
+
+process.on(messages.APP_INITIALIZED, () => {
+  appInitialized = true
+  appInitCallbacks.forEach((fn) => { fn() })
+})

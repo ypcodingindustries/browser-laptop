@@ -411,7 +411,7 @@ app.on('ready', () => {
     delete initialState.perWindowState
     appActions.setState(Immutable.fromJS(initialState))
     Menu.init(initialState, null)
-    sync.init(initialState.sync || {})
+    sync.init(initialState.sync)
     return loadedPerWindowState
   }).then((loadedPerWindowState) => {
     contentSettings.init()

@@ -11,9 +11,11 @@ AppStore
 {
   firstRunTimestamp: integer,
   sync: {
+    enabled: boolean,
     objectId: Array.<number>, // objectId for this sync device
     deviceId: Uint8Array,
     seed: Uint8Array,
+    categories: Array.<string>, // names of categories to sync: historySite, bookmark, siteSetting, device
     lastFetchTimestamp: integer // the last time new sync records were fetched in seconds
   },
   tabs: [{

@@ -497,6 +497,11 @@ module.exports.loadAppState = () => {
 module.exports.defaultAppState = () => {
   return {
     firstRunTimestamp: new Date().getTime(),
+    sync: {
+      enabled: true,
+      categories: [],
+      lastFetchTimestamp: 0
+    },
     sites: topSites,
     tabs: [],
     windows: [],
