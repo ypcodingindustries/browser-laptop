@@ -12,7 +12,7 @@ notifications:
   slack:
     secure: bDwO2uce5JAZvjrvWj4+/+yEXJAIK4O0RcgUWvZ2IMbi7Q9I89Mw40JmkLWL6x2gWZwxr8+FoLtErJA7RVrsfImjrX+NmMyAB7AydLdrBJtkLozNnuacnhcnBRyp1gGCa1ymxCEXGbgC6onAD3kiJJhggr70T+2lu3IuJYXENhc=
 env:
-  - CXX=g++-4.8 NODE_ENV=test
+  - CXX=g++-4.8 NODE_ENV=test BRAVE_TEST_COMMAND_LOGS=1
 addons:
   apt:
     sources:
