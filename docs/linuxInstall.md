@@ -4,6 +4,8 @@
 want to try installing `git` using the package manager for your distro._
 
 ## Debian (jessie) and Ubuntu (Trusty and Xenial) AMD64:
+Althugh other apt versions need to be done manually, it should be easy to get
+one of our highly supported (above) linux distros going with apt!
 To install brave using apt and lsb\_release :
 
 ``` 
