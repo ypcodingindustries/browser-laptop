@@ -59,7 +59,7 @@ module.exports = {
   walletSwitch: '.enablePaymentsSwitch .switchBackground',
   addFundsButton: '.addFunds',
   advancedSettings: '.advancedSettings',
-  fundsSelectBox: '.fundsSelectBox',
+  fundsSelectBox: '[data-test-id="fundsSelectBox"]',
   paymentsStatus: '.walletStatus',
   ledgerTable: '.ledgerTable',
   bitcoinDashboard: '.bitcoinDashboard',
