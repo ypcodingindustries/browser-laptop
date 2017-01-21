@@ -479,21 +479,28 @@ module.exports.loadAppState = () => {
 	    	    console.log('J')
 
         const updateStatus = data.updates.status
+	    	    console.log('J.1')
         delete data.updates.status
         // The process always restarts after an update so if the state
         // indicates that a restart isn't wanted, close right away.
             if (updateStatus === UpdateStatus.UPDATE_APPLYING_NO_RESTART) {
 			    console.log('K')
+	    	    console.log('J.2')
 
           module.exports.saveAppState(data, true).then(() => {
             // Exit immediately without doing the session store saving stuff
             // since we want the same state saved except for the update status
+	    	    console.log('J.3')
             app.exit(0)
           })
+	    	    console.log('J.4')
           return
         }
-      }
+	}
+		    	    console.log('J.5')
+
       data = setVersionInformation(data)
+		    	    console.log('J.6')
     } catch (e) {
       // TODO: Session state is corrupted, maybe we should backup this
 	// corrupted value for people to report into support.
@@ -501,13 +508,18 @@ module.exports.loadAppState = () => {
       if (data) {
         console.log('could not parse data: ', data, e)
       }
+		    	    console.log('J.7')
       data = exports.defaultAppState()
+		    	    console.log('J.8')
       data = setVersionInformation(data)
+		    	    console.log('J.9')
     }
+      console.log('J.10', data.settings[settings.LANGUAGE])
       locale.init(data.settings[settings.LANGUAGE]).then((locale) => {
 	  	    console.log('L')
 
       app.setLocale(locale)
+	  	    console.log('M')
       resolve(data)
     })
   })

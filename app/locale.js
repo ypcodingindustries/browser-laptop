@@ -326,17 +326,21 @@ const defaultLocale = function () {
 
 // Initialize translations for a language
 exports.init = function (language) {
-  // If this is in the main process
+    // If this is in the main process
+    console.log('LL.1')
   if (ipcMain) {
+    console.log('LL.2')
     // Respond to requests for translations from the renderer process
     ipcMain.on('translations', function (event, arg) {
+    console.log('LL.3')
       // Return the entire set of translations synchronously
       event.returnValue = translations
     })
+    console.log('LL.4')
 
     // TODO: There shouldn't need to be a REQUEST_LANGUAGE event at all
     // Respond to requests for the currently configured language code
-    ipcMain.on(REQUEST_LANGUAGE, function (event) {
+      ipcMain.on(REQUEST_LANGUAGE, function (event) {
       event.sender.send(LANGUAGE, {
         langCode: lang,
         languageCodes: availableLanguages
@@ -344,13 +348,17 @@ exports.init = function (language) {
     })
   }
 
+	      console.log('LL.5')
   // Currently selected language identifier I.e. 'en-US'
   lang = language || defaultLocale()
 
+	      console.log('LL.6')
   // Languages to support
   const langs = availableLanguages.map(function (lang) {
     return { code: lang }
   })
+
+    	      console.log('LL.7')
 
   const propertyFiles = []
   const appendLangProperties = function (lang) {
@@ -359,9 +367,12 @@ exports.init = function (language) {
       path.join(__dirname, 'extensions', 'brave', 'locales', lang, 'menu.properties'),
       path.join(__dirname, 'extensions', 'brave', 'locales', lang, 'app.properties'),
       path.join(__dirname, 'extensions', 'brave', 'locales', lang, 'error.properties'),
-      path.join(__dirname, 'extensions', 'brave', 'locales', lang, 'passwords.properties'),
-      path.join(__dirname, 'extensions', 'brave', 'locales', lang, 'common.properties'))
+	path.join(__dirname, 'extensions', 'brave', 'locales', lang, 'common.properties'),
+	path.join(__dirname, 'extensions', 'brave', 'locales', lang, 'passwords.properties')
+    )
   }
+
+    	      console.log('LL.8')
 
   appendLangProperties(lang)
   if (lang !== DEFAULT_LANGUAGE) {
@@ -369,17 +380,28 @@ exports.init = function (language) {
     appendLangProperties(DEFAULT_LANGUAGE)
   }
 
+    	      console.log('LL.9')
+
   // If langs change a new context must be created
   const env = new L20n.Env(L20n.fetchResource)
   ctx = env.createContext(langs, propertyFiles)
 
+    	      console.log('LL.10')
+    console.log('ctx = ', ctx)
   // Translate the renderer identifiers
-  var identifiers = rendererIdentifiers()
-  return ctx.formatValues.apply(ctx, identifiers).then(function (values) {
+    var identifiers = rendererIdentifiers()
+    console.log('LL.11')
+    console.log('identifiers = ', identifiers)
+    console.log(langs, propertyFiles)
+    return ctx.formatValues.apply(ctx, identifiers).then(function (values) {
+		      console.log('LL.12')
+
     // Cache the translations for later retrieval
-    values.forEach(function (value, idx) {
+	values.forEach(function (value, idx) {
       translations[identifiers[idx]] = value
     })
     return lang
-  })
+    })
+
+    console.log('LL.coolj')
 }
