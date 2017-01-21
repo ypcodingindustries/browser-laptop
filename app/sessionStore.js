@@ -401,13 +401,18 @@ module.exports.loadAppState = () => {
     let data
     try {
       data = fs.readFileSync(getStoragePath())
-    } catch (e) {}
-
+    } catch (e) {
+	console.error(e)
+    }
+      console.log('A')
     try {
       data = JSON.parse(data)
       // autofill data migration
-      if (data.autofill) {
+      console.log('B')
+	if (data.autofill) {
+	    console.log('C')
         if (Array.isArray(data.autofill.addresses)) {
+	    console.log('D')
           let addresses = exports.defaultAppState().autofill.addresses
           data.autofill.addresses.forEach((guid) => {
             addresses.guid.push(guid)
@@ -416,6 +421,7 @@ module.exports.loadAppState = () => {
           data.autofill.addresses = addresses
         }
         if (Array.isArray(data.autofill.creditCards)) {
+	    console.log('E')
           let creditCards = exports.defaultAppState().autofill.creditCards
           data.autofill.creditCards.forEach((guid) => {
             creditCards.guid.push(guid)
@@ -424,6 +430,7 @@ module.exports.loadAppState = () => {
           data.autofill.creditCards = creditCards
         }
         if (data.autofill.addresses.guid) {
+	    console.log('F')
           let guids = []
           data.autofill.addresses.guid.forEach((guid) => {
             if (typeof guid === 'object') {
@@ -434,7 +441,9 @@ module.exports.loadAppState = () => {
           })
           data.autofill.addresses.guid = guids
         }
-        if (data.autofill.creditCards.guid) {
+            if (data.autofill.creditCards.guid) {
+			    console.log('G')
+
           let guids = []
           data.autofill.creditCards.guid.forEach((guid) => {
             if (typeof guid === 'object') {
@@ -447,7 +456,9 @@ module.exports.loadAppState = () => {
         }
       }
       // xml migration
-      if (data.settings) {
+	if (data.settings) {
+	    	    console.log('H')
+
         if (data.settings[settings.DEFAULT_SEARCH_ENGINE] === 'content/search/google.xml') {
           data.settings[settings.DEFAULT_SEARCH_ENGINE] = 'Google'
         }
@@ -456,18 +467,24 @@ module.exports.loadAppState = () => {
         }
       }
       // Clean app data here if it wasn't cleared on shutdown
-      if (data.cleanedOnShutdown !== true || data.lastAppVersion !== app.getVersion()) {
+	if (data.cleanedOnShutdown !== true || data.lastAppVersion !== app.getVersion()) {
+	    	    console.log('I')
+
         data = module.exports.cleanAppData(data, false)
       }
       data = Object.assign(module.exports.defaultAppState(), data)
       data.cleanedOnShutdown = false
       // Always recalculate the update status
-      if (data.updates) {
+	if (data.updates) {
+	    	    console.log('J')
+
         const updateStatus = data.updates.status
         delete data.updates.status
         // The process always restarts after an update so if the state
         // indicates that a restart isn't wanted, close right away.
-        if (updateStatus === UpdateStatus.UPDATE_APPLYING_NO_RESTART) {
+            if (updateStatus === UpdateStatus.UPDATE_APPLYING_NO_RESTART) {
+			    console.log('K')
+
           module.exports.saveAppState(data, true).then(() => {
             // Exit immediately without doing the session store saving stuff
             // since we want the same state saved except for the update status
@@ -479,14 +496,17 @@ module.exports.loadAppState = () => {
       data = setVersionInformation(data)
     } catch (e) {
       // TODO: Session state is corrupted, maybe we should backup this
-      // corrupted value for people to report into support.
+	// corrupted value for people to report into support.
+	console.error(e)
       if (data) {
         console.log('could not parse data: ', data, e)
       }
       data = exports.defaultAppState()
       data = setVersionInformation(data)
     }
-    locale.init(data.settings[settings.LANGUAGE]).then((locale) => {
+      locale.init(data.settings[settings.LANGUAGE]).then((locale) => {
+	  	    console.log('L')
+
       app.setLocale(locale)
       resolve(data)
     })

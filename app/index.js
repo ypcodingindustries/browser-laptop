@@ -255,7 +255,7 @@ const initiateSessionStateSave = (beforeQuit) => {
 }
 
 console.log('------18.')
-let loadAppStatePromise = SessionStore.loadAppState()
+let loadAppStatePromise = SessionStore.loadAppState().catch((e) => { console.error(e) })
 console.log('------19')
 
 // Some settings must be set right away on startup, those settings should be handled here.
@@ -277,6 +277,8 @@ console.log('------22')
     app.commandLine.appendSwitch('disable-smooth-scrolling')
   }
 console.log('------23')
+}).catch((e) => {
+    console.error(e)
 })
 
 const notifyCertError = (webContents, url, error, cert) => {
@@ -300,9 +302,14 @@ const notifyCertError = (webContents, url, error, cert) => {
   })
 }
 
+console.log('----19.1')
+
 app.on('ready', () => {
+  console.log('----19.2')
   let sessionStateSaveInterval = null
-  app.on('certificate-error', (e, webContents, url, error, cert, resourceType, overridable, strictEnforcement, expiredPreviousDecision, cb) => {
+    app.on('certificate-error', (e, webContents, url, error, cert, resourceType, overridable, strictEnforcement, expiredPreviousDecision, cb) => {
+	console.log('----19.2')
+
     let host = urlParse(url).host
     if (host && acceptCertDomains[host] === true) {
       // Ignore the cert error
@@ -425,6 +432,8 @@ app.on('ready', () => {
       lastWindowState = undefined
     }
   })
+    
+console.log('----19.3')
 
   loadAppStatePromise.then((initialState) => {
     console.log('------24')
@@ -788,5 +797,9 @@ app.on('ready', () => {
       })
     })
     ready = true
+  }).catch((e) => {
+    console.error(e)
   })
+
 })
+console.log('I am at the end')
