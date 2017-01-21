@@ -5,10 +5,11 @@
 
 'use strict'
 
+console.log('------1')
 let ready = false
 
 // Setup the crash handling
-const CrashHerald = require('./crash-herald')
+// const CrashHerald = require('./crash-herald')
 
 const handleUncaughtError = (error) => {
   var message, ref, stack
@@ -38,18 +39,26 @@ process.on('unhandledRejection', function (error, promise) {
 
 process.on('warning', warning => console.warn(warning.stack))
 
+console.log('------2')
 if (process.platform === 'win32') {
   require('./windowsInit')
 }
+console.log('------3')
 
 const electron = require('electron')
+console.log('------4')
 const app = electron.app
+console.log('------5')
 const BrowserWindow = electron.BrowserWindow
 const dialog = electron.dialog
 const ipcMain = electron.ipcMain
+console.log('------6')
 const Immutable = require('immutable')
+console.log('------7')
 const Menu = require('./browser/menu')
+console.log('------8')
 const Updater = require('./updater')
+console.log('------9')
 const Importer = require('./importer')
 const messages = require('../js/constants/messages')
 const appConfig = require('../js/constants/appConfig')
@@ -59,28 +68,35 @@ const AppStore = require('../js/stores/appStore')
 const PackageLoader = require('./package-loader')
 const Autofill = require('./autofill')
 const Extensions = require('./extensions')
+console.log('------10')
 const TrackingProtection = require('./trackingProtection')
 const AdBlock = require('./adBlock')
 const AdInsertion = require('./browser/ads/adInsertion')
 const HttpsEverywhere = require('./httpsEverywhere')
 const SiteHacks = require('./siteHacks')
+console.log('------11')
 const CmdLine = require('./cmdLine')
 const UpdateStatus = require('../js/constants/updateStatus')
 const urlParse = require('url').parse
+console.log('------12')
 const CryptoUtil = require('../js/lib/cryptoUtil')
 const keytar = require('keytar')
 const siteSettings = require('../js/state/siteSettings')
 const spellCheck = require('./spellCheck')
+console.log('------13')
 const locale = require('./locale')
 const ledger = require('./ledger')
 const contentSettings = require('../js/state/contentSettings')
 const privacy = require('../js/state/privacy')
 const async = require('async')
+console.log('------14')
 const settings = require('../js/constants/settings')
+console.log('------15')
 
 // temporary fix for #4517, #4518 and #4472
 app.commandLine.appendSwitch('enable-use-zoom-for-dsf', 'false')
 app.commandLine.appendSwitch('enable-features', 'BlockSmallPluginContent,PreferHtmlOverPlugins')
+console.log('------16')
 
 // Used to collect the per window state when shutting down the application
 let perWindowState = []
@@ -108,6 +124,7 @@ const defaultProtocols = ['http', 'https']
 const sessionStoreQueue = async.queue((task, callback) => {
   task(callback)
 }, 1)
+console.log('------17')
 
 /**
  * Gets the master key for encrypting login credentials from the OS keyring.
@@ -237,23 +254,29 @@ const initiateSessionStateSave = (beforeQuit) => {
   }
 }
 
+console.log('------18.')
 let loadAppStatePromise = SessionStore.loadAppState()
+console.log('------19')
 
 // Some settings must be set right away on startup, those settings should be handled here.
 loadAppStatePromise.then((initialState) => {
+console.log('------20')
   const {HARDWARE_ACCELERATION_ENABLED, SMOOTH_SCROLL_ENABLED, SEND_CRASH_REPORTS} = require('../js/constants/settings')
   if (initialState.settings[HARDWARE_ACCELERATION_ENABLED] === false) {
     app.disableHardwareAcceleration()
   }
+console.log('------21')
   if (initialState.settings[SEND_CRASH_REPORTS] !== false) {
-    console.log('Crash reporting enabled')
-    CrashHerald.init()
+    console.log('Crash reporting woudl be enabled if I did not comment it out')
+    //CrashHerald.init()
   } else {
     console.log('Crash reporting disabled')
   }
+console.log('------22')
   if (initialState.settings[SMOOTH_SCROLL_ENABLED] === false) {
     app.commandLine.appendSwitch('disable-smooth-scrolling')
   }
+console.log('------23')
 })
 
 const notifyCertError = (webContents, url, error, cert) => {
@@ -404,24 +427,37 @@ app.on('ready', () => {
   })
 
   loadAppStatePromise.then((initialState) => {
+    console.log('------24')
     // Do this after loading the state
     // For tests we always want to load default app state
     const loadedPerWindowState = initialState.perWindowState
     delete initialState.perWindowState
     appActions.setState(Immutable.fromJS(initialState))
+    console.log('------25')
     Menu.init(initialState, null)
     return loadedPerWindowState
   }).then((loadedPerWindowState) => {
+    console.log('------26')
     contentSettings.init()
+    console.log('------27')
     privacy.init()
+    console.log('------28')
     Autofill.init()
+    console.log('------29')
     Extensions.init()
+    console.log('------30')
     SiteHacks.init()
+    console.log('------31')
     spellCheck.init()
+    console.log('------32')
     HttpsEverywhere.init()
+    console.log('------33')
     TrackingProtection.init()
+    console.log('------34')
     AdBlock.init()
+    console.log('------35')
     AdInsertion.init()
+    console.log('------36')
 
     if (!loadedPerWindowState || loadedPerWindowState.length === 0) {
       if (!CmdLine.newWindowURL()) {
@@ -432,7 +468,10 @@ app.on('ready', () => {
         appActions.newWindow(undefined, undefined, wndState)
       })
     }
+    console.log('------36')
+
     process.emit(messages.APP_INITIALIZED)
+    console.log('------37')
 
     if (process.env.BRAVE_IS_DEFAULT_BROWSER !== undefined) {
       if (process.env.BRAVE_IS_DEFAULT_BROWSER === 'true') {
@@ -446,16 +485,19 @@ app.on('ready', () => {
         ? true : defaultProtocols.every(p => app.isDefaultProtocolClient(p))
       appActions.changeSetting(settings.IS_DEFAULT_BROWSER, isDefaultBrowser)
     }
+    console.log('------38')
 
     if (CmdLine.newWindowURL()) {
       appActions.newWindow(Immutable.fromJS({
         location: CmdLine.newWindowURL()
       }))
     }
+    console.log('------39')
 
     ipcMain.on(messages.QUIT_APPLICATION, () => {
       app.quit()
     })
+    console.log('------40')
 
     ipcMain.on(messages.PREFS_RESTART, (e, config, value) => {
       var message = locale.translation('prefsRestart')
