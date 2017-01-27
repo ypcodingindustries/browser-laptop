@@ -1165,7 +1165,7 @@ describe('navigationBar tests', function () {
     })
   })
 
-  describe('auto open bookmarks toolbar for the first bookmark', function () {
+  describe.only('auto open bookmarks toolbar for the first bookmark', function () {
     Brave.beforeAll(this)
 
     before(function * () {
