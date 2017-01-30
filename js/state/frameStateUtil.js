@@ -245,10 +245,9 @@ function isAncestorFrameKey (frames, frame, parentFrameKey) {
 }
 
 function getPartitionNumber (partition) {
-  console.log(partition)
-  const regex = /partition-(\d+)/
+  const regex = /(?:persist:)?partition-(\d+)/
   const matches = regex.exec(partition)
-  return matches && matches[0]
+  return matches && matches[1]
 }
 
 function isPrivatePartition (partition) {
@@ -260,13 +259,16 @@ function isSessionPartition (partition) {
 }
 
 function getPartition (frameOpts) {
-  let partition = 'persist:default'
-  if (frameOpts.get('isPrivate')) {
-    partition = 'default'
-  } else if (frameOpts.get('partitionNumber')) {
-    partition = `persist:partition-${frameOpts.get('partitionNumber')}`
+  return getPartitionFromNumber(frameOpts.get('partitionNumber'), frameOpts.get('isPrivate'))
+}
+
+function getPartitionFromNumber (partitionNumber, incognito) {
+  if (!partitionNumber && !incognito) {
+    return 'persist:default'
+  } else if (incognito) {
+    return 'default'
   }
-  return partition
+  return `persist:partition-${partitionNumber}`
 }
 
 /**
@@ -307,6 +309,15 @@ const tabFromFrame = (frame) => {
   }
 }
 
+const frameOptsFromFrame = (frame) => {
+  return frame
+    .delete('key')
+    .delete('parentFrameKey')
+    .delete('activeShortcut')
+    .delete('activeShortcutDetails')
+    .deleteIn(['navbar', 'urlbar', 'suggestions'])
+}
+
 /**
  * Adds a frame specified by frameOpts and newKey and sets the activeFrameKey
  * @return Immutable top level application state ready to merge back in
@@ -319,9 +330,7 @@ function addFrame (windowState, tabs, frameOpts, newKey, partitionNumber, active
   // from a renderer initiated navigation (window.open, cmd/ctrl-click, etc...)
   const delayedLoadUrl = frameOpts.delayedLoadUrl
   delete frameOpts.delayedLoadUrl
-  const urlBarFocused = activeFrameKey === newKey &&
-    url === config.defaultUrl &&
-    delayedLoadUrl === undefined
+
   const location = delayedLoadUrl || url // page url
 
   // Only add pin requests if it's not already added
@@ -366,8 +375,9 @@ function addFrame (windowState, tabs, frameOpts, newKey, partitionNumber, active
           searchResults: [],
           suggestionList: null
         },
-        selected: urlBarFocused,
-        focused: urlBarFocused,
+        selected: false,
+        // URL load-start will focus the webview if it's not newtab.
+        focused: true,
         active: false
       }
     },
@@ -571,11 +581,13 @@ module.exports = {
   getFramePropsIndex,
   getFrameKeysByDisplayIndex,
   getPartition,
+  getPartitionFromNumber,
   addFrame,
   undoCloseFrame,
   removeFrame,
   removeOtherFrames,
   tabFromFrame,
+  frameOptsFromFrame,
   getFrameKeyByTabId,
   getFrameTabPageIndex,
   frameStatePath,
