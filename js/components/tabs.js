@@ -143,6 +143,7 @@ class Tabs extends ImmutableComponent {
                 onTabClosedWithMouse={this.onTabClosedWithMouse}
                 tabWidth={this.props.fixTabWidth}
                 hasTabInFullScreen={this.props.hasTabInFullScreen}
+                notificationBarActive={this.props.notificationBarActive}
                 totalTabs={this.props.tabs.size}
                 partOfFullPageSet={this.props.partOfFullPageSet} />)
         }

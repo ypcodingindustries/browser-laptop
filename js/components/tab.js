@@ -26,6 +26,7 @@ const {Favicon, AudioTabIcon, NewSessionIcon,
       PrivateIcon, TabTitle, CloseTabIcon} = require('../../app/renderer/components/tabContent')
 const {getTabBreakpoint, tabUpdateFrameRate} = require('../../app/renderer/lib/tabUtil')
 const {isWindows} = require('../../app/common/lib/platformUtil')
+const {NotificationBarCaret} = require('./notificationBar.js')
 
 class Tab extends ImmutableComponent {
   constructor () {
@@ -230,6 +231,8 @@ class Tab extends ImmutableComponent {
 
   render () {
     const playIndicatorBreakpoint = this.mediumView || this.narrowView
+    const urlOrigin = new window.URL(this.props.tab.get('location')).origin
+    const notificationBar = this.props.isActive && this.props.notificationBarActive.includes(urlOrigin)
     const perPageStyles = StyleSheet.create({
       themeColor: {
         color: this.themeColor ? getTextColorForBackground(this.themeColor) : 'inherit',
@@ -252,6 +255,11 @@ class Tab extends ImmutableComponent {
       style={this.props.tabWidth ? { flex: `0 0 ${this.props.tabWidth}px` } : {}}
       onMouseEnter={this.onMouseEnter}
       onMouseLeave={this.onMouseLeave}>
+      {
+        notificationBar
+          ? <NotificationBarCaret />
+          : null
+      }
       <div className={css(
         styles.tab,
         // Windows specific style

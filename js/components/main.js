@@ -23,7 +23,7 @@ const TabPages = require('./tabPages')
 const TabsToolbar = require('./tabsToolbar')
 const FindBar = require('./findbar')
 const UpdateBar = require('./updateBar')
-const NotificationBar = require('./notificationBar')
+const {NotificationBar} = require('./notificationBar')
 const DownloadsBar = require('../../app/renderer/components/downloadsBar')
 const Button = require('./button')
 const BrowserActionButton = require('../../app/renderer/components/browserActionButton')
@@ -936,6 +936,9 @@ class Main extends ImmutableComponent {
 
     const appStateSites = this.props.appState.get('sites')
     const activeTabShowingMessageBox = !!(activeTab && activeTab.get('messageBoxDetail'))
+    const notifications = this.props.appState.get('notifications')
+    const hasNotifications = notifications && notifications.size
+    const notificationBarOrigin = this.props.appState.get('notifications').map(bar => bar.get('frameOrigin'))
 
     return <div id='window'
       className={cx({
@@ -1173,12 +1176,6 @@ class Main extends ImmutableComponent {
 
         <UpdateBar updates={this.props.appState.get('updates')} />
         {
-          this.props.appState.get('notifications') && this.props.appState.get('notifications').size && activeFrame
-          ? <NotificationBar notifications={this.props.appState.get('notifications')}
-            activeFrame={activeFrame} />
-          : null
-        }
-        {
           showBookmarksToolbar
           ? <BookmarksToolbar
             draggingOverData={this.props.windowState.getIn(['ui', 'dragging', 'draggingOver', 'dragType']) === dragTypes.BOOKMARK && this.props.windowState.getIn(['ui', 'dragging', 'draggingOver'])}
@@ -1221,12 +1218,19 @@ class Main extends ImmutableComponent {
           key='tab-bar'
           activeFrameKey={activeFrame && activeFrame.get('key') || undefined}
           onMenu={this.onHamburgerMenu}
+          notificationBarActive={notificationBarOrigin}
           hasTabInFullScreen={
             sortedFrames
               .map((frame) => frame.get('isFullScreen'))
               .some(fullScreenMode => fullScreenMode === true)
           }
         />
+        {
+          hasNotifications && activeFrame
+          ? <NotificationBar notifications={this.props.appState.get('notifications')}
+            activeFrame={activeFrame} />
+          : null
+        }
 
         {
           activeFrame && activeFrame.get('findbarShown') && !activeFrame.get('isFullScreen')

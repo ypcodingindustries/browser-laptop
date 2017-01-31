@@ -67,7 +67,8 @@ const globalStyles = {
     statsBlue: '#0796fa',
     statsLightGray: '#999999',
     defaultIconBackground: '#F7F7F7',
-    almostInvisible: 'rgba(255,255,255,0.01)'
+    almostInvisible: 'rgba(255,255,255,0.01)',
+    notificationItemColor: '#ffefc0'
   },
   radius: {
     borderRadius: '4px',
@@ -117,7 +118,8 @@ const globalStyles = {
     dialogTopOffset: '30px',
     paymentsMargin: '20px',
     modalPanelHeaderMarginBottom: '.5em',
-    paddingHorizontal: '30px'
+    paddingHorizontal: '30px',
+    caretSize: '20px'
   },
   shadow: {
     switchShadow: 'inset 0 1px 4px rgba(0, 0, 0, 0.35)',

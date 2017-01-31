@@ -9,6 +9,9 @@ const ipc = require('electron').ipcRenderer
 const messages = require('../constants/messages')
 const getOrigin = require('../state/siteUtil').getOrigin
 
+const {StyleSheet, css} = require('aphrodite/no-important')
+const globalStyles = require('../../app/renderer/components/styles/global')
+
 class NotificationItem extends ImmutableComponent {
   clickHandler (buttonIndex, e) {
     const nonce = this.props.detail.get('options').get('nonce')
@@ -93,4 +96,53 @@ class NotificationBar extends ImmutableComponent {
   }
 }
 
-module.exports = NotificationBar
+class NotificationBarCaret extends ImmutableComponent {
+  render () {
+    return <div className={css(styles.caretWrapper)}>
+      <div className={css(styles.caret)} />
+    </div>
+  }
+}
+
+const caret = (size, color) => `${Number.parseInt(size, 10) / 2}px solid ${color}`
+
+const styles = StyleSheet.create({
+  caretWrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: globalStyles.zindex.zindexTabs
+  },
+
+  caret: {
+    position: 'relative',
+    margin: 'auto',
+    width: globalStyles.spacing.caretSize,
+
+    ':before': {
+      content: '""',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      borderBottom: caret(globalStyles.spacing.caretSize, globalStyles.color.notificationItemColor),
+      borderLeft: caret(globalStyles.spacing.caretSize, 'transparent'),
+      borderRight: caret(globalStyles.spacing.caretSize, 'transparent')
+    },
+
+    ':after': {
+      content: '""',
+      position: 'absolute',
+      bottom: globalStyles.spacing.caretSize,
+      left: globalStyles.spacing.caretSize,
+      borderBottom: caret(0, '#eeeeee'),
+      borderLeft: caret(0, 'transparent'),
+      borderRight: caret(0, 'transparent')
+    }
+  }
+})
+
+module.exports = {
+  NotificationBar,
+  NotificationBarCaret
+}
