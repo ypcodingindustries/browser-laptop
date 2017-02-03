@@ -6,6 +6,7 @@ from lib.github import GitHub
 import requests
 
 BROWSER_LAPTOP_REPO = 'brave/browser-laptop'
+TARGET_ARCH= os.environ['TARGET_ARCH'] if os.environ.has_key('TARGET_ARCH') else 'x64'
 RELEASE_NAME = ('PRE (DO NOT DOWNLOAD UNLESS YOU ARE TESTING '
   'THIS RELEASE CANDIDATE) Dev Channel Beta')
 
@@ -44,6 +45,10 @@ def upload_browser_laptop(github, release, file_path):
 
   # Upload the file.
   with open(file_path, 'rb') as f:
+    if filename == 'RELEASE':
+      filename = 'RELEASE-{0}'.format(TARGET_ARCH)
+    else:
+      return
     upload_io_to_github(github, release,
         filename, f, 'application/octet-stream')
 
