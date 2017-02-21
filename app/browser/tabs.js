@@ -11,9 +11,7 @@ let currentWebContents = {}
 const cleanupWebContents = (tabId) => {
   if (currentWebContents[tabId]) {
     delete currentWebContents[tabId]
-    setImmediate(() => {
-      appActions.tabClosed({ tabId })
-    })
+    appActions.tabClosed({ tabId })
   }
 }
 
@@ -32,9 +30,7 @@ const tabUpdated = debounce(appActions.tabUpdated.bind(appActions), 5)
 const updateTab = (tabId) => {
   let tabValue = getTabValue(tabId)
   if (tabValue) {
-    setImmediate(() => {
-      tabUpdated(tabValue)
-    })
+    tabUpdated(tabValue)
   }
 }
 
@@ -160,9 +156,7 @@ const api = {
       currentWebContents[tabId] = tab
       let tabValue = getTabValue(tabId)
       if (tabValue) {
-        setImmediate(() => {
-          appActions.tabCreated(tabValue)
-        })
+        appActions.tabCreated(tabValue)
       }
     })
 
