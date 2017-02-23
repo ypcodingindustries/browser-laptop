@@ -364,7 +364,6 @@ module.exports.init = function (appState) {
         }
       }
     }
-    syncUtil.applySyncRecords(records)
   })
   return appState
 }

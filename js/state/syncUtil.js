@@ -206,14 +206,14 @@ module.exports.applySyncRecords = (records) => {
  * Used to respond to IPC GET_EXISTING_OBJECTS.
  * @param {string} categoryName
  * @param {Object} syncRecord
- * @returns {Object=}
+ * @returns {Array.<Object?>}
  */
 module.exports.getExistingObject = (categoryName, syncRecord) => {
   const AppStore = require('../stores/appStore')
   const appState = AppStore.getState()
   const objectId = new Immutable.List(syncRecord.objectId)
   const existingObject = module.exports.getObjectById(objectId, categoryName)
-  if (!existingObject) { return null }
+  if (!existingObject) { return [null, null] }
 
   const existingObjectData = existingObject[1].toJS()
   let item
@@ -232,13 +232,13 @@ module.exports.getExistingObject = (categoryName, syncRecord) => {
   if (!item) {
     throw new Error(`Can't create JS from existingObject! ${existingObjectData}`)
   }
-  return {
+  return [{
     action: writeActions.CREATE,
     deviceId: appState.getIn(['sync', 'deviceId']),
     objectData: item.name,
     objectId: item.objectId,
     [item.name]: item.value
-  }
+  }, existingObjectData]
 }
 
 /**

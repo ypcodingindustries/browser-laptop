@@ -45,6 +45,29 @@ const reorderSite = (sites, order) => {
 }
 
 /**
+ * Converts parent folder object ID property on a site to a parent folder ID
+ * @param {Immutable.Map} sites
+ * @param {Immutable.Map} siteDetail
+ */
+const parentFolderObjectIdToParentFolderId = (sites, siteDetail) => {
+  if (!sites || !siteDetail) {
+    return siteDetail
+  }
+  const objectId = siteDetail.get('parentFolderObjectId')
+  if (!objectId || !objectId.size) {
+    return siteDetail
+  }
+  siteDetail = siteDetail.delete('parentFolderObjectId')
+  const parentFolder = sites.find((site) => {
+    return site && site.get('objectId') && site.get('objectId').equals(objectId)
+  })
+  if (parentFolder) {
+    siteDetail = siteDetail.set('parentFolderId', parentFolder.get('parentFolderId'))
+  }
+  return siteDetail
+}
+
+/**
  * Sort comparator for sort function
  */
 module.exports.siteSort = (x, y) => {
@@ -220,6 +243,8 @@ const mergeSiteDetails = (oldSiteDetail, newSiteDetail, tag, folderId, order) =>
  * @return The new sites Immutable object
  */
 module.exports.addSite = function (sites, siteDetail, tag, originalSiteDetail, syncCallback) {
+  siteDetail = parentFolderObjectIdToParentFolderId(sites, siteDetail)
+
   // Get tag from siteDetail object if not passed via tag param
   if (tag === undefined) {
     tag = siteDetail.getIn(['tags', 0])
@@ -280,6 +305,7 @@ module.exports.addSite = function (sites, siteDetail, tag, originalSiteDetail, s
  * @return {Immutable.Map} The new sites Immutable object
  */
 module.exports.removeSite = function (sites, siteDetail, tag, reorder = true, syncCallback) {
+  siteDetail = parentFolderObjectIdToParentFolderId(sites, siteDetail)
   const key = module.exports.getSiteKey(siteDetail)
   if (!key) {
     return sites
@@ -375,6 +401,8 @@ module.exports.isMoveAllowed = (sites, sourceDetail, destinationDetail) => {
  */
 module.exports.moveSite = function (sites, sourceDetail, destinationDetail, prepend,
   destinationIsParent, disallowReparent, syncCallback) {
+  sourceDetail = parentFolderObjectIdToParentFolderId(sites, sourceDetail)
+
   if (!module.exports.isMoveAllowed(sites, sourceDetail, destinationDetail)) {
     return sites
   }

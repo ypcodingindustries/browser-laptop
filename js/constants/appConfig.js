@@ -106,6 +106,7 @@ module.exports = {
     apiVersion: '0',
     serverUrl: isProduction ? 'https://sync.brave.com' : 'https://sync-staging.brave.com',
     debug: !isProduction,
+    platform: 'laptop',
     s3Url: isProduction ? 'https://brave-sync.s3.dualstack.us-west-2.amazonaws.com' : 'https://brave-sync-staging.s3.dualstack.us-west-2.amazonaws.com',
     fetchInterval: 1000 * 60
   },
