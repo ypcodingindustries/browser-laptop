@@ -597,6 +597,11 @@ eventStore.addChangeListener(() => {
         appActions.changeSiteSetting(pattern, 'ledgerPayments', !exclude)
         updatePublisherInfo()
       })
+    } else if (!getSetting(settings.AUTO_SUGGEST_SITES)) {
+      excludeP(publisher, (unused, exclude) => {
+        appActions.changeSiteSetting(pattern, 'ledgerPayments', false)
+        updatePublisherInfo()
+      })
     }
     updateLocation(location, publisher)
     entry = synopsis.publishers[publisher]
