@@ -808,7 +808,7 @@ class Frame extends ImmutableComponent {
       if (this.frame.isEmpty()) {
         return
       }
-      if (e.isMainFrame && !e.isErrorPage && !e.isFrameSrcDoc) {
+      if (e.isMainFrame && !e.isErrorPage) {
         windowActions.onWebviewLoadStart(this.frame, e.url)
         // Clear security state
         windowActions.setBlockedRunInsecureContent(this.frame)
