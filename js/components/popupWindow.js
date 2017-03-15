@@ -47,8 +47,8 @@ class PopupWindow extends ImmutableComponent {
       })
       let updateSize = () => {
         webview.getPreferredSize((preferredSize) => {
-          let width = preferredSize.width
-          let height = preferredSize.height
+          let width = preferredSize.width / devicePixelRatio
+          let height = preferredSize.height / devicePixelRatio
           if (width !== this.width || height !== this.height) {
             this.width = width
             this.height = height
