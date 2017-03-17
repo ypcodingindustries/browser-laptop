@@ -1,6 +1,10 @@
 language: node_js
-node_js:
-  - "7"
+matrix:
+  include:
+    - node_js: "7"
+      env: CXX=g++-4.8 NODE_ENV=test TEST_SUITE=unit
+    - node_js: "7"
+      env: CXX=g++-4.8 NODE_ENV=test TEST_SUITE=webdriver
 dist: trusty
 sudo: required
 before_install:
@@ -8,12 +12,14 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 script:
   - npm run download-sync-client
-  - npm run lint && npm test
+  - if [[ "$TEST_SUITE" == "unit" ]]; then
+       npm run lint && npm unittest
+    else
+       npm run lint && npm uitest
+    fi
 notifications:
   slack:
     secure: bDwO2uce5JAZvjrvWj4+/+yEXJAIK4O0RcgUWvZ2IMbi7Q9I89Mw40JmkLWL6x2gWZwxr8+FoLtErJA7RVrsfImjrX+NmMyAB7AydLdrBJtkLozNnuacnhcnBRyp1gGCa1ymxCEXGbgC6onAD3kiJJhggr70T+2lu3IuJYXENhc=
-env:
-  - CXX=g++-4.8 NODE_ENV=test
 addons:
   apt:
     sources:
