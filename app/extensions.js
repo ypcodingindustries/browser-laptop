@@ -361,6 +361,9 @@ module.exports.init = () => {
     installInfo.base_path = fileUrl(installInfo.base_path)
     extensionActions.extensionInstalled(installInfo.id, installInfo)
     extensionActions.extensionEnabled(installInfo.id)
+    if (installInfo.id === config.braveExtensionId) {
+      session.defaultSession.extensions.setIsIncognitoEnabled(installInfo.id, true)
+    }
   })
 
   let loadExtension = (extensionId, extensionPath, manifest = {}, manifestLocation = 'unpacked') => {
