@@ -6,6 +6,7 @@ const electron = require('electron')
 const BrowserWindow = electron.BrowserWindow
 const electronLocalshortcut = require('electron-localshortcut')
 const messages = require('../js/constants/messages')
+const appActions = require('../js/actions/appActions')
 const isDarwin = process.platform === 'darwin'
 
 module.exports.register = (win) => {
@@ -19,7 +20,6 @@ module.exports.register = (win) => {
     ['CmdOrCtrl+Shift+[', messages.SHORTCUT_PREV_TAB],
     ['CmdOrCtrl+Alt+Right', messages.SHORTCUT_NEXT_TAB],
     ['CmdOrCtrl+Alt+Left', messages.SHORTCUT_PREV_TAB],
-    ['CmdOrCtrl+Shift+S', messages.SHORTCUT_NEW_FRAME, undefined, { isPartitioned: true }],
     ['Ctrl+PageDown', messages.SHORTCUT_NEXT_TAB],
     ['Ctrl+PageUp', messages.SHORTCUT_PREV_TAB],
     ['CmdOrCtrl+9', messages.SHORTCUT_SET_ACTIVE_FRAME_TO_LAST],
@@ -40,20 +40,20 @@ module.exports.register = (win) => {
       ['Alt+Left', messages.SHORTCUT_ACTIVE_FRAME_BACK],
       ['Alt+Right', messages.SHORTCUT_ACTIVE_FRAME_FORWARD])
   } else {
-      // Different shorcut for View Source as is common for Chrome/Safari on macOS
-      // See #7702
-      simpleWebContentEvents.push(
-        ['Cmd+Alt+U', messages.SHORTCUT_ACTIVE_FRAME_VIEW_SOURCE]
-      )
+    // Different shorcut for View Source as is common for Chrome/Safari on macOS
+    // See #7702
+    simpleWebContentEvents.push(
+      ['Cmd+Alt+U', messages.SHORTCUT_ACTIVE_FRAME_VIEW_SOURCE]
+    )
 
-      if (process.env.NODE_ENV !== 'development') {
-        // We're in Darwin and release or test mode...
-        // We disable for development mode because Browser level dev tools copy doesn't work.
-        // Workaround for #1060
-        simpleWebContentEvents.push(
-          ['Cmd+C', messages.SHORTCUT_ACTIVE_FRAME_COPY]
-        )
-      }
+    if (process.env.NODE_ENV !== 'development') {
+      // We're in Darwin and release or test mode...
+      // We disable for development mode because Browser level dev tools copy doesn't work.
+      // Workaround for #1060
+      simpleWebContentEvents.push(
+        ['Cmd+C', messages.SHORTCUT_ACTIVE_FRAME_COPY]
+      )
+    }
   }
 
   // Tab ordering shortcuts
@@ -75,6 +75,12 @@ module.exports.register = (win) => {
     if (win) {
       win.toggleDevTools()
     }
+  })
+
+  electronLocalshortcut.register(win, 'CmdOrCtrl+Shift+S', () => {
+    appActions.createTabRequested({
+      isPartitioned: true
+    })
   })
 }
 
