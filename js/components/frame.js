@@ -328,12 +328,8 @@ class Frame extends ImmutableComponent {
         this.webview.addEventListener('did-attach', eventCallback)
       }
 
-      if (this.props.guestInstanceId) {
-        if (!this.frame.get('pinnedLocation') || isFocused()) {
-          if (!this.webview.attachGuest(this.props.guestInstanceId)) {
-            console.error('could not set guestInstanceId ' + this.props.guestInstanceId)
-          }
-        }
+      if (this.props.guestInstanceId && this.webview.attachGuest(this.props.guestInstanceId)) {
+        console.log('guest instance id is set ' + this.props.guestInstanceId)
       } else {
         // The partition is guaranteed to be initialized by now by the browser process
         this.webview.setAttribute('partition', frameStateUtil.getPartition(this.frame))
