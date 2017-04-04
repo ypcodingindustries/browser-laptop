@@ -195,7 +195,7 @@ const createWindow = (action) => {
   const startupSetting = getSetting(settings.STARTUP_MODE)
 
   setImmediate(() => {
-    let mainWindow = new BrowserWindow(Object.assign(windowProps, browserOpts))
+    let mainWindow = new BrowserWindow(Object.assign(windowProps, browserOpts, {disposition: frameOpts.disposition}))
 
     // initialize frames state
     let frames = []
@@ -347,8 +347,11 @@ function handleChangeSettingAction (settingKey, settingValue) {
 const applyReducers = (state, action) => [
   require('../../app/browser/reducers/downloadsReducer'),
   require('../../app/browser/reducers/flashReducer'),
-  require('../../app/browser/reducers/sitesReducer'),
+  // tabs, sites and windows reducers need to stay in that order
+  // until we have a better way to manage dependencies
   require('../../app/browser/reducers/tabsReducer'),
+  require('../../app/browser/reducers/sitesReducer'),
+  require('../../app/browser/reducers/windowsReducer'),
   require('../../app/browser/reducers/spellCheckReducer'),
   require('../../app/browser/reducers/clipboardReducer'),
   require('../../app/browser/reducers/passwordManagerReducer'),
@@ -383,7 +386,6 @@ const handleAppAction = (action) => {
       // See tabsReducer.js for app state init example
       // TODO(bridiver) - these should be refactored into reducers
       appState = filtering.init(appState, action, appStore)
-      appState = windows.init(appState, action, appStore)
       appState = basicAuth.init(appState, action, appStore)
       appState = webtorrent.init(appState, action, appStore)
       appState = profiles.init(appState, action, appStore)

@@ -72,6 +72,6 @@ window.addEventListener('beforeunload', function (e) {
 ipc.on(messages.INITIALIZE_WINDOW, (e, disposition, appState, frames, initWindowState) => {
   appStoreRenderer.state = Immutable.fromJS(appState)
   ReactDOM.render(
-    <Window includePinnedSites={disposition !== 'new-popup'} frames={frames} initWindowState={initWindowState} />,
+    <Window frames={frames} initWindowState={initWindowState} />,
     document.getElementById('appContainer'))
 })

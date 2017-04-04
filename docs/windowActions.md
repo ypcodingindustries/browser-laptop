@@ -71,6 +71,20 @@ Dispatches a message to set the frame tab id
 
 
 
+### setFrameGuestInstanceId(frameProps, tabId, guestInstanceId) 
+
+Dispatches a message to set the frame tab id
+
+**Parameters**
+
+**frameProps**: `Object`, The frame properties
+
+**tabId**: `Number`, the tab id to set
+
+**guestInstanceId**: `Number`, the guest instance id to set
+
+
+
 ### framePinned(frameProps, pinned) 
 
 Dispatches a message to pin a tab
