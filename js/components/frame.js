@@ -653,9 +653,19 @@ class Frame extends ImmutableComponent {
         return
       }
 
-      let tabId = e.tabID
+      const tabId = e.tabID
       if (this.props.tabId !== tabId) {
         windowActions.setFrameTabId(this.frame, tabId)
+      }
+    })
+    this.webview.addEventListener('guest-ready', (e) => {
+      if (this.frame.isEmpty()) {
+        return
+      }
+
+      const guestInstanceId = e.guestInstanceId
+      if (this.props.guestInstanceId !== e.guestInstanceId) {
+        windowActions.setFrameGuestInstanceId(this.frame, guestInstanceId)
       }
     })
     this.webview.addEventListener('content-blocked', (e) => {

@@ -196,7 +196,12 @@ const tabState = {
     if (!action.get('replace')) {
       tabValue = currentTabValue.mergeDeep(tabValue)
     }
-    return state.set('tabs', tabs.delete(index).insert(index, tabValue))
+
+    state = state.set('tabs', tabs.delete(index).insert(index, tabValue))
+
+    // TOOD: Once we persist tabs, we can refactor this away
+    return state.set('pinnedTabs', state.get('tabs')
+      .groupBy((tab) => tab.get('url')).map((tabs) => tabs.first()).toList().filter((tab) => tab.get('pinned')))
   },
 
   getTabs: (state) => {
@@ -227,12 +232,6 @@ const tabState = {
     state = makeImmutable(state)
 
     state = tabState.removeTabField(state, 'messageBoxDetail')
-
-    // TOOD: Once we persist tabs, we can refactor this away
-    state = state.set('pinnedTabs', state.get('tabs')
-      .filter((tab) => tab.get('pinned')))
-
-    // TODO(bridiver) - handle restoring tabs
     return state.delete('tabs')
   }
 }

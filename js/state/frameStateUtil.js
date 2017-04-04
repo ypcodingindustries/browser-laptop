@@ -7,6 +7,9 @@ const config = require('../constants/config')
 const {tabCloseAction} = require('../../app/common/constants/settingsEnums')
 const urlParse = require('../../app/common/urlParse')
 
+const comparatorByKeyAsc = (a, b) => a.get('key') > b.get('key')
+      ? 1 : b.get('key') > a.get('key') ? -1 : 0
+
 const matchFrame = (queryInfo, frame) => {
   queryInfo = queryInfo.toJS ? queryInfo.toJS() : queryInfo
   return !Object.keys(queryInfo).map((queryKey) => (frame.get(queryKey) === queryInfo[queryKey])).includes(false)
@@ -26,6 +29,22 @@ function isFrameKeyActive (windowState, frameKey) {
 
 function getFrameDisplayIndex (windowState, frame) {
   return findDisplayIndexForFrameKey(windowState.get('frames'), frame)
+}
+
+function getFrames (windowState) {
+  return windowState.get('frames')
+}
+
+function getSortedFrames (windowState) {
+  return windowState.get('frames').sort(comparatorByKeyAsc)
+}
+
+function getPinnedFrames (windowState) {
+  return windowState.get('frames').filter((frame) => frame.get('pinnedLocation'))
+}
+
+function getNonPinnedFrames (windowState) {
+  return windowState.get('frames').filter((frame) => !frame.get('pinnedLocation'))
 }
 
 function getFrameIndex (windowState, frame) {
@@ -558,6 +577,10 @@ module.exports = {
   getNonPinnedFrameCount,
   isPrivatePartition,
   isSessionPartition,
+  getFrames,
+  getSortedFrames,
+  getPinnedFrames,
+  getNonPinnedFrames,
   getFrameIndex,
   getFrameDisplayIndex,
   getActiveFrameIndex,

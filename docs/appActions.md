@@ -43,6 +43,22 @@ A new tab has been created
 
 
 
+### tabMoved(tabId, frameOpts, browserOpts, windowId) 
+
+A tab has been moved to another window
+
+**Parameters**
+
+**tabId**: `Number`, A tab has been moved to another window
+
+**frameOpts**: `Object`, A tab has been moved to another window
+
+**browserOpts**: `Object`, A tab has been moved to another window
+
+**windowId**: `Number`, A tab has been moved to another window
+
+
+
 ### createTabRequested(createProperties) 
 
 A request for a new tab has been made with the specified createProperties

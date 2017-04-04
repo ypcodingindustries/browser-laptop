@@ -77,6 +77,23 @@ const appActions = {
   },
 
   /**
+   * A tab has been moved to another window
+   * @param {Number} tabId
+   * @param {Object} frameOpts
+   * @param {Object} browserOpts
+   * @param {Number} windowId
+   */
+  tabMoved: function (tabId, frameOpts, browserOpts, windowId) {
+    AppDispatcher.dispatch({
+      actionType: appConstants.APP_TAB_MOVED,
+      tabId,
+      frameOpts,
+      browserOpts,
+      windowId
+    })
+  },
+
+  /**
    * A request for a new tab has been made with the specified createProperties
    * @param {Object} createProperties
    */
@@ -1081,21 +1098,6 @@ const appActions = {
         windowId
       },
       frameOpts
-    })
-  },
-
-  /*
-   * Dispatches a message when a tab is detached from a window
-   * @param {number} windowId - The windowId of the old host window
-   * @param {number} tabId - The tabId which was removed
-   */
-  tabDetachedFromWindow: function (windowId, tabId) {
-    AppDispatcher.dispatch({
-      actionType: appConstants.APP_TAB_DETACHED_FROM_WINDOW,
-      queryInfo: {
-        windowId
-      },
-      tabId
     })
   },
 

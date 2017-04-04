@@ -82,11 +82,24 @@ const windowActions = {
    * @param {Number} tabId - the tab id to set
    * @param {Number} guestInstanceId - the guest instance id to set
    */
-  setFrameTabId: function (frameProps, tabId, guestInstanceId) {
+  setFrameTabId: function (frameProps, tabId) {
     dispatch({
       actionType: windowConstants.WINDOW_SET_FRAME_TAB_ID,
       frameProps,
-      tabId,
+      tabId
+    })
+  },
+
+  /**
+   * Dispatches a message to set the frame tab id
+   * @param {Object} frameProps - The frame properties
+   * @param {Number} tabId - the tab id to set
+   * @param {Number} guestInstanceId - the guest instance id to set
+   */
+  setFrameGuestInstanceId: function (frameProps, guestInstanceId) {
+    dispatch({
+      actionType: windowConstants.WINDOW_SET_FRAME_GUEST_INSTANCE_ID,
+      frameProps,
       guestInstanceId
     })
   },
