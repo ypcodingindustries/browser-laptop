@@ -346,6 +346,7 @@ const api = {
         createProperties.parent_partition = ''
       }
     }
+    console.log('----create tab:', createProperties)
     extensions.createTab(createProperties, (tab) => {
       cb && cb(tab)
     })
