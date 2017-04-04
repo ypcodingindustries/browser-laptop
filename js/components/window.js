@@ -14,7 +14,7 @@ const Main = require('./main')
 const SiteTags = require('../constants/siteTags')
 const cx = require('../lib/classSet')
 const {getPlatformStyles} = require('../../app/common/lib/platformUtil')
-const {siteSort} = require('../state/siteUtil')
+const {getDetailFromFrame, getDetailFromTab, getSiteKey, siteSort} = require('../state/siteUtil')
 const {currentWindowId} = require('../../app/renderer/currentWindow')
 
 window.appActions = appActions
@@ -57,7 +57,8 @@ class Window extends React.Component {
             url: frame.location,
             partitionNumber: frame.partitionNumber,
             isPrivate: frame.isPrivate,
-            active: i === 0
+            active: i === 0,
+            windowId: currentWindowId
           })
         })
       }
@@ -120,27 +121,44 @@ class Window extends React.Component {
 
     const pinnedSites = this.appState.get('sites').filter((site) => site.get('tags').includes(SiteTags.PINNED))
 
+    // There could be some recently pinned tabs by the user in the current window
+    // Check for them here and mark them as already pinned.
+    this.appState.get('tabs')
+      .filter((tab) => tab.get('pinned') &&
+        tab.get('windowId') === currentWindowId)
+      .map((tab) => getSiteKey(getDetailFromTab(tab)))
+      .forEach(alreadyPinnedSites.add.bind(alreadyPinnedSites))
+
     // Check for new pinned sites which we don't already know about
     const sitesToAdd = pinnedSites.filter((site) =>
-        !alreadyPinnedSites.find((pinned) => pinned.equals(site)))
-    const sitesToClose = alreadyPinnedSites.filter((pinned) =>
-        !pinnedSites.find((site) => pinned.equals(site)))
+        !alreadyPinnedSites.find((pinnedSiteKey) => pinnedSiteKey === getSiteKey(site)))
+    console.log('----sitesToAdd', sitesToAdd.toJS())
+    /*
+    const sitesToClose = alreadyPinnedSites.filter((pinnedSitekey) =>
+        !pinnedSites.find((pinnedSite) => pinnedSiteKey === getSiteKey(pinnedSite)))
+        */
 
     sitesToAdd.sort(siteSort).forEach((site) => {
-      alreadyPinnedSites = alreadyPinnedSites.add(site)
+      alreadyPinnedSites = alreadyPinnedSites.add(getSiteKey(site))
       appActions.createTabRequested({
         url: site.get('location'),
         partitionNumber: site.get('partitionNumber'),
-        pinned: true
+        pinned: true,
+        windowId: currentWindowId
       })
     })
 
     const frames = this.windowState.get('frames')
+      /*
     const framesToClose = frames.filter((frame) =>
         sitesToClose.find((site) =>
             frame.get('pinnedLocation') === site.get('location') &&
             (frame.get('partitionNumber') || 0) === (site.get('partitionNumber') || 0)))
-    framesToClose.forEach((frameProps) => windowActions.closeFrame(frames, frameProps, true))
+    framesToClose.forEach((frameProps) => {
+      sitesToAdd.delete(getSiteKey(getDetailFromFrame(frameProps)))
+      windowActions.closeFrame(frames, frameProps, true)
+    })
+    */
   }
 }
 
