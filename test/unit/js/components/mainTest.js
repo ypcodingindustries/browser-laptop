@@ -7,7 +7,7 @@ const mockery = require('mockery')
 const {shallow} = require('enzyme')
 const assert = require('assert')
 const Immutable = require('immutable')
-let Main, NavigationBar
+let Main
 require('../../braveUnit')
 
 describe('Main component unit tests', function () {
@@ -97,11 +97,6 @@ describe('Main component unit tests', function () {
       wrapper = shallow(
         <Main windowState={windowState} appState={appState2} />
       )
-    })
-
-    it('passes activeTabShowingMessageBox to NavigationBar', function () {
-      const navigationBar = wrapper.find(NavigationBar).node
-      assert.equal(navigationBar.props.activeTabShowingMessageBox, true)
     })
 
     it('disables both back/forward navigationButtonContainers', function () {

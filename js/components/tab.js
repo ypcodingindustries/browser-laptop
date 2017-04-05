@@ -28,7 +28,7 @@ const {Favicon, AudioTabIcon, NewSessionIcon,
 const {getTabBreakpoint, tabUpdateFrameRate} = require('../../app/renderer/lib/tabUtil')
 const {isWindows} = require('../../app/common/lib/platformUtil')
 const {currentWindowId} = require('../../app/renderer/currentWindow')
-const {frameOptsFromFrame} = require('../state/frameStateUtil')
+const frameStateUtil = require('../state/frameStateUtil')
 
 class Tab extends ImmutableComponent {
   constructor () {
@@ -117,7 +117,7 @@ class Tab extends ImmutableComponent {
 
     // TODO(bridiver) - a window with a single tab should not be draggable
     if (!dnd.isDraggingInsideWindow()) {
-      const frameOpts = frameOptsFromFrame(this.frame).toJS()
+      const frameOpts = frameStateUtil.frameOptsFromFrame(this.frame).toJS()
       const browserOpts = { positionByMouseCursor: true }
       let dropWindowId = -1
       if (this.props.dragData) {
@@ -156,7 +156,7 @@ class Tab extends ImmutableComponent {
 
   get loading () {
     return this.frame &&
-    (this.props.tab.get('loading') ||
+    (frameStateUtil.isFrameLoading(this.frame) ||
      this.props.tab.get('location') === 'about:blank') &&
     (!this.props.tab.get('provisionalLocation') ||
     !this.props.tab.get('provisionalLocation').startsWith('chrome-extension://mnojpmjdmbbfmejpflffifhffcmidifd/'))

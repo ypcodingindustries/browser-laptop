@@ -61,6 +61,7 @@ const {bookmarksToolbarMode} = require('../../app/common/constants/settingsEnums
 // State handling
 const basicAuthState = require('../../app/common/state/basicAuthState')
 const extensionState = require('../../app/common/state/extensionState')
+const tabState = require('../../app/common/state/tabState')
 const aboutHistoryState = require('../../app/common/state/aboutHistoryState')
 const frameStateUtil = require('../state/frameStateUtil')
 const siteUtil = require('../state/siteUtil')
@@ -76,7 +77,6 @@ const urlParse = require('../../app/common/urlParse')
 const debounce = require('../lib/debounce')
 const {currentWindow, isMaximized, isFocused, isFullScreen} = require('../../app/renderer/currentWindow')
 const emptyMap = new Immutable.Map()
-const emptyList = new Immutable.List()
 const {makeImmutable} = require('../../app/common/state/immutableUtil')
 const platformUtil = require('../../app/common/lib/platformUtil')
 
@@ -580,7 +580,7 @@ class Main extends ImmutableComponent {
       return undefined
     }
     let location = activeFrame.get('location')
-    const history = activeFrame.get('history')
+    const history = frameStateUtil.getHistory(activeFrame)
     if (isIntermediateAboutPage(location)) {
       const parsedUrl = urlParse(location)
       if (parsedUrl.hash) {
@@ -942,7 +942,7 @@ class Main extends ImmutableComponent {
       !customTitlebar.menubarSelectedIndex
 
     const appStateSites = this.props.appState.get('sites')
-    const activeTabShowingMessageBox = !!(activeTab && activeTab.get('messageBoxDetail'))
+    const activeTabShowingMessageBox = !!(activeTab && tabState.isShowingMessageBox(this.props.appState, activeTab.get('tabId')))
     const totalBlocks = activeFrame ? this.getTotalBlocks(activeFrame) : false
 
     return <div id='window'
@@ -1022,31 +1022,17 @@ class Main extends ImmutableComponent {
               </div>
               <NavigationBar
                 ref={(node) => { this.navBar = node }}
-                navbar={activeFrame && activeFrame.get('navbar')}
                 sites={appStateSites}
-                canGoForward={activeTab && activeTab.get('canGoForward')}
-                activeFrameKey={(activeFrame && activeFrame.get('key')) || undefined}
-                location={(activeFrame && activeFrame.get('location')) || ''}
-                title={(activeFrame && activeFrame.get('title')) || ''}
                 scriptsBlocked={activeFrame && activeFrame.getIn(['noScript', 'blocked'])}
                 partitionNumber={(activeFrame && activeFrame.get('partitionNumber')) || 0}
-                history={(activeFrame && activeFrame.get('history')) || emptyList}
                 suggestionIndex={(activeFrame && activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'selectedIndex'])) || 0}
-                isSecure={activeFrame ? activeFrame.getIn(['security', 'isSecure']) : null}
-                hasLocationValueSuffix={activeFrame && activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'urlSuffix'])}
-                startLoadTime={(activeFrame && activeFrame.get('startLoadTime')) || undefined}
-                endLoadTime={(activeFrame && activeFrame.get('endLoadTime')) || undefined}
-                loading={activeFrame && activeFrame.get('loading')}
                 bookmarkDetail={this.props.windowState.get('bookmarkDetail')}
-                mouseInTitlebar={this.props.windowState.getIn(['ui', 'mouseInTitlebar'])}
-                searchDetail={this.props.windowState.get('searchDetail')}
                 enableNoScript={this.enableNoScript(activeSiteSettings)}
                 settings={this.props.appState.get('settings')}
                 noScriptIsVisible={noScriptIsVisible}
                 menubarVisible={customTitlebar.menubarVisible}
                 siteSettings={this.props.appState.get('siteSettings')}
                 synopsis={this.props.appState.getIn(['publisherInfo', 'synopsis']) || new Immutable.Map()}
-                activeTabShowingMessageBox={activeTabShowingMessageBox}
                 locationInfo={this.props.appState.get('locationInfo')}
               />
               <div className='topLevelEndButtons'>
@@ -1300,7 +1286,7 @@ class Main extends ImmutableComponent {
                         .includes(siteTags.BOOKMARK_FOLDER)) || emptyMap
                   : null}
                 isFullScreen={frame.get('isFullScreen')}
-                isSecure={frame.getIn(['security', 'isSecure'])}
+                isSecure={frameStateUtil.isFrameSecure(frame)}
                 showFullScreenWarning={frame.get('showFullScreenWarning')}
                 findbarShown={frame.get('findbarShown')}
                 findDetail={frame.get('findDetail')}

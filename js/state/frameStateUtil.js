@@ -5,6 +5,7 @@
 const Immutable = require('immutable')
 const config = require('../constants/config')
 const {tabCloseAction} = require('../../app/common/constants/settingsEnums')
+const { makeImmutable } = require('../../app/common/state/immutableUtil')
 const urlParse = require('../../app/common/urlParse')
 
 const comparatorByKeyAsc = (a, b) => a.get('key') > b.get('key')
@@ -133,6 +134,35 @@ function getFrameByDisplayIndex (windowState, i) {
 
 function getFrameByKey (windowState, key) {
   return find(windowState, {key})
+}
+
+function isFrameSecure (frame) {
+  frame = makeImmutable(frame)
+  if (frame && frame.getIn(['security', 'isSecure']) != null) {
+    return frame.getIn(['security', 'isSecure'])
+  } else {
+    return false
+  }
+}
+
+function isFrameLoading (frame) {
+  frame = makeImmutable(frame)
+  return frame && frame.get('loading')
+}
+
+function startLoadTime (frame) {
+  frame = makeImmutable(frame)
+  return frame && frame.get('startLoadTime')
+}
+
+function endLoadTime (frame) {
+  frame = makeImmutable(frame)
+  return frame && frame.get('endLoadTime')
+}
+
+function getHistory (frame) {
+  frame = makeImmutable(frame)
+  return (frame && frame.get('history')) || Immutable.fromJS([])
 }
 
 function isFrameKeyPinned (frames, key) {
@@ -338,7 +368,7 @@ const tabFromFrame = (frame) => {
     isPrivate: frame.get('isPrivate'),
     partitionNumber: frame.get('partitionNumber'),
     frameKey: frame.get('key'),
-    loading: frame.get('loading'),
+    loading: isFrameLoading(frame),
     provisionalLocation: frame.get('provisionalLocation'),
     pinnedLocation: frame.get('pinnedLocation'),
     location: frame.get('location')
@@ -605,6 +635,11 @@ module.exports = {
   find,
   isAncestorFrameKey,
   isFrameKeyActive,
+  isFrameSecure,
+  isFrameLoading,
+  startLoadTime,
+  endLoadTime,
+  getHistory,
   isFrameKeyPinned,
   getNonPinnedFrameCount,
   isPrivatePartition,

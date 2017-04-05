@@ -6,6 +6,7 @@ const React = require('react')
 const urlParse = require('../../common/urlParse')
 
 const ImmutableComponent = require('../../../js/components/immutableComponent')
+const ReduxComponent = require('./reduxComponent')
 const windowActions = require('../../../js/actions/windowActions')
 const appActions = require('../../../js/actions/appActions')
 const KeyCodes = require('../../common/constants/keyCodes')
@@ -19,10 +20,15 @@ const messages = require('../../../js/constants/messages')
 const {getSetting} = require('../../../js/settings')
 const settings = require('../../../js/constants/settings')
 const contextMenus = require('../../../js/contextMenus')
-const windowStore = require('../../../js/stores/windowStore')
+const frameStateUtil = require('../../../js/state/frameStateUtil')
 const UrlUtil = require('../../../js/lib/urlutil')
 const {eventElHasAncestorWithClasses, isForSecondaryAction} = require('../../../js/lib/eventUtil')
 const {isUrl, isIntermediateAboutPage} = require('../../../js/lib/appUrlUtil')
+const {isSourceAboutUrl} = require('../../../js/lib/appUrlUtil')
+
+// state helpers
+const frameState = require('../../common/state/frameState')
+const tabState = require('../../common/state/tabState')
 
 class UrlBar extends ImmutableComponent {
   constructor () {
@@ -40,21 +46,13 @@ class UrlBar extends ImmutableComponent {
       if (!this.urlInput || this.keyPressed || this.locationValue.length === 0) {
         return
       }
-      const suffixLen = this.locationValueSuffix.length
-      if (suffixLen > 0 && this.urlInput.value !== this.locationValue + this.locationValueSuffix) {
-        this.setValue(this.locationValue, this.locationValueSuffix)
+      const suffixLen = this.props.locationValueSuffix.length
+      if (suffixLen > 0 && this.urlInput.value !== this.locationValue + this.props.locationValueSuffix) {
+        this.setValue(this.locationValue, this.props.locationValueSuffix)
         const len = this.locationValue.length
         this.urlInput.setSelectionRange(len, len + suffixLen)
       }
     }, 10)
-  }
-
-  get locationValueSuffix () {
-    return this.activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'urlSuffix'])
-  }
-
-  get activeFrame () {
-    return windowStore.getFrame(this.props.activeFrameKey)
   }
 
   get isActive () {
@@ -181,10 +179,10 @@ class UrlBar extends ImmutableComponent {
           location = location.replace(/^(\s*javascript:)+/i, '')
           const isLocationUrl = isUrl(location)
           if (!isLocationUrl && e.ctrlKey) {
-            appActions.loadURLRequested(this.activeFrame.get('tabId'), `www.${location}.com`)
+            appActions.loadURLRequested(this.props.activeFrame.get('tabId'), `www.${location}.com`)
           } else if (this.shouldRenderUrlBarSuggestions &&
               ((typeof this.activeIndex === 'number' && this.activeIndex >= 0) ||
-              (this.locationValueSuffix && this.autocompleteEnabled))) {
+              (this.props.locationValueSuffix && this.autocompleteEnabled))) {
             // Hack to make alt enter open a new tab for url bar suggestions when hitting enter on them.
             const isDarwin = process.platform === 'darwin'
             if (e.altKey) {
@@ -210,7 +208,7 @@ class UrlBar extends ImmutableComponent {
                 active: !!e.shiftKey
               })
             } else {
-              appActions.loadURLRequested(this.activeFrame.get('tabId'), location)
+              appActions.loadURLRequested(this.props.activeFrame.get('tabId'), location)
             }
           }
         }
@@ -237,9 +235,9 @@ class UrlBar extends ImmutableComponent {
         break
       case KeyCodes.DELETE:
         if (e.shiftKey) {
-          const selectedIndex = this.locationValueSuffix.length > 0 ? 1 : this.activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'selectedIndex'])
+          const selectedIndex = this.props.locationValueSuffix.length > 0 ? 1 : this.props.activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'selectedIndex'])
           if (selectedIndex !== undefined) {
-            const suggestionLocation = this.activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'suggestionList', selectedIndex - 1]).location
+            const suggestionLocation = this.props.activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'suggestionList', selectedIndex - 1]).location
             appActions.removeSite({ location: suggestionLocation })
           }
         } else {
@@ -288,15 +286,15 @@ class UrlBar extends ImmutableComponent {
   }
 
   updateLocationToSuggestion () {
-    if (this.locationValueSuffix.length > 0) {
-      windowActions.setNavBarUserInput(this.locationValue + this.locationValueSuffix)
+    if (this.props.locationValueSuffix.length > 0) {
+      windowActions.setNavBarUserInput(this.locationValue + this.props.locationValueSuffix)
     }
   }
 
   get suggestionLocation () {
-    const selectedIndex = this.activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'selectedIndex'])
+    const selectedIndex = this.props.activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'selectedIndex'])
     if (typeof selectedIndex === 'number') {
-      const suggestion = this.activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'suggestionList', selectedIndex - 1])
+      const suggestion = this.props.activeFrame.getIn(['navbar', 'urlbar', 'suggestions', 'suggestionList', selectedIndex - 1])
       if (suggestion) {
         return suggestion.location
       }
@@ -350,7 +348,7 @@ class UrlBar extends ImmutableComponent {
       windowActions.setUrlBarSelected(false)
     }
     // We never want to set the full navbar user input to include the suffix
-    if (this.locationValue + this.locationValueSuffix !== e.target.value) {
+    if (this.locationValue + this.props.locationValueSuffix !== e.target.value) {
       windowActions.setNavBarUserInput(this.lastVal)
     }
     this.keyPressed = false
@@ -392,6 +390,36 @@ class UrlBar extends ImmutableComponent {
       this.setValue(UrlUtil.getDisplayLocation(this.props.location, getSetting(settings.PDFJS_ENABLED)))
       this.focus()
     }
+  }
+
+  mergeProps (state, dispatchProps, ownProps) {
+    const activeFrame = frameStateUtil.getActiveFrame(state.get('currentWindow'))
+    const activeFrameKey = activeFrame.get('key')
+    const tabId = frameState.getTabIdByFrameKey(state, activeFrameKey)
+    const location = tabState.getLocation(state, tabId)
+
+    const props = {
+      activeFrame,
+      activeFrameKey,
+      location,
+      isSecure: tabState.isSecure(state, tabId),
+      loading: tabState.isLoading(state, tabId),
+      startLoadTime: tabState.startLoadTime(state, tabId),
+      endLoadTime: tabState.endLoadTime(state, tabId),
+      canGoForward: tabState.canGoForward(state, tabId),
+      activeTabShowingMessageBox: tabState.isShowingMessageBox(state, tabId),
+      hasLocationValueSuffix: tabState.hasLocationValueSuffix(state, tabId),
+      locationValueSuffix: tabState.locationValueSuffix(state, tabId),
+      history: tabState.getHistory(state, tabId),
+      noBorderRadius: !isSourceAboutUrl(location),
+      title: tabState.getTitle(state, tabId),
+      urlbar: tabState.getUrlBar(state, tabId),
+      titleMode: tabState.isTitleMode(state, tabId),
+      // TODO(bridiver) - add state helper
+      searchDetail: state.getIn(['currentWindow', 'searchDetail'])
+    }
+
+    return Object.assign({}, ownProps, props)
   }
 
   componentDidUpdate (prevProps) {
@@ -482,7 +510,7 @@ class UrlBar extends ImmutableComponent {
   }
 
   onContextMenu (e) {
-    contextMenus.onUrlBarContextMenu(this.props.searchDetail, this.activeFrame, e)
+    contextMenus.onUrlBarContextMenu(this.props.searchDetail, this.props.activeFrame, e)
   }
 
   render () {
@@ -559,4 +587,4 @@ class UrlBar extends ImmutableComponent {
   }
 }
 
-module.exports = UrlBar
+module.exports = ReduxComponent.connect(UrlBar)

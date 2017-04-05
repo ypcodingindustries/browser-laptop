@@ -2,8 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+const Immutable = require('immutable')
 const { makeImmutable, isMap, isList } = require('./immutableUtil')
 const assert = require('assert')
+const frameState = require('./frameState')
+const getSetting = require('../../../js/settings').getSetting
+const settings = require('../../../js/constants/settings')
+// this file should eventually replace frameStateUtil
+const frameStateUtil = require('../../../js/state/frameStateUtil')
 
 const validateId = function (propName, id) {
   assert.ok(id, `${propName} cannot be null`)
@@ -157,10 +163,8 @@ const tabState = {
   },
 
   getByTabId: (state, tabId) => {
-    if (parseInt(tabId) < 0) {
-      return null
-    }
     state = validateState(state)
+    tabId = validateId('tabId', tabId)
 
     return state.get('tabs').find((tab) => tab.get('tabId') === tabId)
   },
@@ -242,6 +246,110 @@ const tabState = {
 
     tabValue = tabValue.set('frame', makeImmutable(action.get('frame')))
     return tabState.updateTabValue(state, tabValue)
+  },
+
+  getTabValueById: (state, tabId, key) => {
+    state = validateState(state)
+    tabId = validateId('tabId', tabId)
+    const tab = tabState.getByTabId(state, tabId)
+    if (!tab) {
+      return
+    }
+    return tab.get(key)
+  },
+
+  canGoForward: (state, tabId) => {
+    return tabState.getTabValueById(state, tabId, 'canGoForward') || false
+  },
+
+  canGoBack: (state, tabId) => {
+    return tabState.getTabValueById(state, tabId, 'canGoBack') || false
+  },
+
+  isShowingMessageBox: (state, tabId) => {
+    return tabState.getTabValueById(state, tabId, 'messageBoxDetail') || false
+  },
+
+  getTitle: (state, tabId) => {
+    return tabState.getTabValueById(state, tabId, 'title') || ''
+  },
+
+  getFrameByTabId: (state, tabId) => {
+    const currentWindow = state.get('currentWindow')
+    if (currentWindow) {
+      return frameState.getFrameByTabId(currentWindow, tabId)
+    } else {
+      const tab = tabState.getByTabId(state, tabId)
+      if (tab) {
+        return tab.get('frame')
+      }
+    }
+  },
+
+  isSecure: (state, tabId) => {
+    const frame = tabState.getFrameByTabId(state, tabId)
+    return frameStateUtil.isFrameSecure(frame)
+  },
+
+  isLoading: (state, tabId) => {
+    const frame = tabState.getFrameByTabId(state, tabId)
+    return frameStateUtil.isFrameLoading(frame)
+  },
+
+  startLoadTime: (state, tabId) => {
+    const frame = tabState.getFrameByTabId(state, tabId)
+    return frameStateUtil.startLoadTime(frame)
+  },
+
+  endLoadTime: (state, tabId) => {
+    const frame = tabState.getFrameByTabId(state, tabId)
+    return frameStateUtil.endLoadTime(frame)
+  },
+
+  locationValueSuffix: (state, tabId) => {
+    const frame = tabState.getFrameByTabId(state, tabId)
+    return (frame && frame.getIn(['navbar', 'urlbar', 'suggestions', 'urlSuffix'])) || ''
+  },
+
+  hasLocationValueSuffix: (state, tabId) => {
+    const frame = tabState.getFrameByTabId(state, tabId)
+    return !!(frame && frame.getIn(['navbar', 'urlbar', 'suggestions', 'urlSuffix']))
+  },
+
+  getHistory: (state, tabId) => {
+    const frame = tabState.getFrameByTabId(state, tabId)
+    return frameStateUtil.getHistory(frame)
+  },
+
+  getLocation: (state, tabId) => {
+    const frame = tabState.getFrameByTabId(state, tabId)
+    return (frame && frame.get('location')) || ''
+  },
+
+  getUrlBar: (state, tabId) => {
+    const frame = tabState.getFrameByTabId(state, tabId)
+    return (frame && frame.getIn(['navbar', 'urlbar'])) || new Immutable.Map()
+  },
+
+  // TODO(bridiver) - refactor this so it doesn't require windowState
+  isTitleMode: (state, tabId) => {
+    const windowState = state.get('currentWindow')
+    assert.ok(windowState, `isTitleMode requires windowState`)
+    const mouseInTitlebar = windowState.getIn(['ui', 'mouseInTitlebar'])
+    const bookmarkDetail = windowState.get('bookmarkDetail')
+    const location = tabState.getLocation(state, tabId)
+    const urlbar = tabState.getUrlBar(state, tabId)
+    return tabState.isShowingMessageBox(state, tabId) ||
+      (
+        mouseInTitlebar === false &&
+        !bookmarkDetail &&
+        tabState.getTitle(state, tabId) &&
+        !['about:blank', 'about:newtab'].includes(location) &&
+        !tabState.isLoading(state, tabId) &&
+        !urlbar.get('focused') &&
+        !urlbar.get('active') &&
+        getSetting(settings.DISABLE_TITLE_MODE) === false
+      )
   },
 
   getPersistentState: (state) => {
