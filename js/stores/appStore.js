@@ -244,7 +244,10 @@ class AppStore extends EventEmitter {
 
   emitChanges (emitFullState) {
     if (lastEmittedState) {
-      const d = diff(lastEmittedState, appState)
+      // diff and patch will make map out of order so toList() is to maintain
+      // sites map order
+      const diffAppState = appState.set('sites', appState.get('sites').toList())
+      const d = diff(lastEmittedState, diffAppState)
       if (!d.isEmpty()) {
         BrowserWindow.getAllWindows().forEach((wnd) =>
           wnd.webContents.send(messages.APP_STATE_CHANGE, { stateDiff: d.toJS() }))
@@ -456,6 +459,7 @@ const handleAppAction = (action) => {
               siteUtil.removeSite(sites, siteDetail, tag))
             break
         }
+        appState = appState.set('sites', appState.get('sites').sort(siteUtil.siteSort))
       })
       appState = aboutNewTabState.setSites(appState)
       appState = aboutHistoryState.setHistory(appState)
@@ -478,6 +482,7 @@ const handleAppAction = (action) => {
         appState = appState.set('sites', siteUtil.moveSite(appState.get('sites'),
           action.siteDetail, action.destinationDetail, false, false, true))
       }
+      appState = appState.set('sites', appState.get('sites').sort(siteUtil.siteSort))
       // If there was an item added then clear out the old history entries
       if (oldSiteSize !== appState.get('sites').size) {
         filterOutNonRecents()
@@ -488,6 +493,7 @@ const handleAppAction = (action) => {
     case appConstants.APP_REMOVE_SITE:
       const removeSiteSyncCallback = action.skipSync ? undefined : syncActions.removeSite
       appState = appState.set('sites', siteUtil.removeSite(appState.get('sites'), action.siteDetail, action.tag, true, removeSiteSyncCallback))
+      appState = appState.set('sites', appState.get('sites').sort(siteUtil.siteSort))
       appState = aboutNewTabState.setSites(appState, action)
       appState = aboutHistoryState.setHistory(appState, action)
       break
@@ -496,6 +502,7 @@ const handleAppAction = (action) => {
         appState = appState.set('sites', siteUtil.moveSite(appState.get('sites'),
           action.sourceDetail, action.destinationDetail, action.prepend,
           action.destinationIsParent, false, syncActions.updateSite))
+        appState = appState.set('sites', appState.get('sites').sort(siteUtil.siteSort))
         break
       }
     case appConstants.APP_CLEAR_HISTORY:

@@ -24,7 +24,7 @@ const {fileUrl} = require('../../js/lib/appUrlUtil')
 const menuUtil = require('../common/lib/menuUtil')
 const getSetting = require('../../js/settings').getSetting
 const locale = require('../locale')
-const {isSiteBookmarked, siteSort} = require('../../js/state/siteUtil')
+const {isSiteBookmarked} = require('../../js/state/siteUtil')
 const isDarwin = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const aboutUrl = 'https://brave.com/'
@@ -367,7 +367,7 @@ const createBookmarksSubmenu = () => {
     CommonMenu.exportBookmarksMenuItem()
   ]
 
-  const bookmarks = menuUtil.createBookmarkTemplateItems(appStore.getState().get('sites').toList().sort(siteSort))
+  const bookmarks = menuUtil.createBookmarkTemplateItems(appStore.getState().get('sites'))
   if (bookmarks.length > 0) {
     submenu.push(CommonMenu.separatorMenuItem)
     submenu = submenu.concat(bookmarks)
