@@ -370,6 +370,15 @@ var exports = {
       }, 5000, null, 100)
     })
 
+    this.app.client.addCommand('waitForWindowCount', function (windowCount) {
+      logVerbose('waitForWindowCount(' + windowCount + ')')
+      return this.waitUntil(function () {
+        return this.getWindowCount().then((count) => {
+          return count === windowCount
+        })
+      })
+    })
+
     this.app.client.addCommand('waitForAddressCount', function (addressCount) {
       logVerbose('waitForAddressCount(' + addressCount + ')')
       return this.waitUntil(function () {
@@ -377,6 +386,18 @@ var exports = {
           const ret = (val.value && val.value && val.value.autofill &&
             val.value.autofill.addresses && val.value.autofill.addresses.guid.length) || 0
           logVerbose('waitForAddressCount(' + addressCount + ') => ' + ret)
+          return ret
+        })
+      }, 5000, null, 100)
+    })
+
+    this.app.client.addCommand('waitForTabIndex', function (index) {
+      logVerbose('waitForTabIndex(' + index + ')')
+      return this.waitUntil(function () {
+        return this.getAppState().then((val) => {
+          logVerbose(val.value && val.value.tabs)
+          const ret = val.value && val.value && val.value.tabs.find((tab) => tab.index === index)
+          logVerbose('waitForTabIndex(' + index + ') => ' + ret)
           return ret
         })
       }, 5000, null, 100)
@@ -541,11 +562,20 @@ var exports = {
     })
 
     this.app.client.addCommand('pinTabByIndex', function (index, isPinned) {
-      return this.getWindowState().then((val) => {
-        const tabId = val.value.frames[index].tabId
+      return this.waitForTabIndex(index).getAppState().then((val) => {
+        const tab = val.value.tabs.find((tab) => tab.index === index)
         return this.execute(function (tabId, isPinned) {
-          devTools('electron').testData.appActions.tabPinned(tabId, isPinned)
-        }, tabId, isPinned)
+          devTools('appActions').tabPinned(tabId, isPinned)
+        }, tab.tabId, isPinned)
+      })
+    })
+
+    this.app.client.addCommand('closeTabByIndex', function (index) {
+      return this.waitForTabIndex(index).getAppState().then((val) => {
+        const tab = val.value.tabs.find((tab) => tab.index === index)
+        return this.execute(function (tabId) {
+          devTools('appActions').tabClosed({tabId})
+        }, tab.tabId)
       })
     })
 
