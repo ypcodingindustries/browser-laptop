@@ -234,6 +234,7 @@ module.exports.onSyncReady = (isFirstRun, e) => {
   }
 
   appActions.createSyncCache()
+  e.sender.send(messages.FETCH_SYNC_DEVICES)
 
   // Periodically poll for new records
   let startAt = appState.getIn(['sync', 'lastFetchTimestamp']) || 0
@@ -337,20 +338,28 @@ module.exports.init = function (appState) {
   ipcMain.on(messages.SYNC_DEBUG, (e, msg) => {
     log(msg)
   })
-  ipcMain.on(messages.GET_EXISTING_OBJECTS, (event, categoryName, records) => {
+  ipcMain.on(messages.GET_EXISTING_OBJECTS, (event, categoryName, records, lastRecordTimestamp) => {
     if (!syncEnabled()) {
       return
     }
+    let deviceIds = new Immutable.Set()
     log(`getting existing objects for ${records.length} ${categoryName}`)
     if (!CATEGORY_NAMES.includes(categoryName) || !records || !records.length) {
       return
     }
     const recordsAndExistingObjects = records.map((record) => {
       const safeRecord = syncUtil.ipcSafeObject(record)
+      deviceIds = deviceIds.add(safeRecord.deviceId)
       const existingObject = syncUtil.getExistingObject(categoryName, record)
       return [safeRecord, existingObject]
     })
     event.sender.send(messages.RESOLVE_SYNC_RECORDS, categoryName, recordsAndExistingObjects)
+    // For each device we saw, update its last record timestamp.
+    // Records' Sync timestamps aren't exposed here, so approximate
+    // with the batch's last timestamp.
+    deviceIds.forEach(deviceId => {
+      appActions.saveSyncDevice(deviceId, {lastRecordTimestamp})
+    })
   })
   ipcMain.on(messages.RESOLVED_SYNC_RECORDS, (event, categoryName, records) => {
     if (!records || !records.length) {

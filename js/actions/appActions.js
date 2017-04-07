@@ -866,6 +866,19 @@ const appActions = {
   },
 
   /**
+   * Dispatch to update sync device cache (deviceId, last record)
+   * @param {Array.<number>} deviceId
+   * @param {Object} detail {lastRecordTimestamp=, name=}
+   */
+  saveSyncDevice: function (deviceId, detail) {
+    AppDispatcher.dispatch({
+      actionType: appConstants.APP_SAVE_SYNC_DEVICE,
+      deviceId,
+      detail
+    })
+  },
+
+  /**
    * Dispatches a message when sync init data needs to be saved
    * @param {Array.<number>|null} seed
    * @param {Array.<number>|null} deviceId

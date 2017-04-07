@@ -12,6 +12,7 @@ const niceware = require('niceware')
 const ModalOverlay = require('../../../../js/components/modalOverlay')
 const Button = require('../../../../js/components/button')
 const {SettingsList, SettingItem, SettingCheckbox} = require('../settings')
+const SortableTable = require('../../../../js/components/sortableTable')
 
 const aboutActions = require('../../../../js/about/aboutActions')
 const getSetting = require('../../../../js/settings').getSetting
@@ -68,10 +69,43 @@ class SyncTab extends ImmutableComponent {
           </div>
         </div>
       </div>
+      {this.enabled ? this.devicesContent : null}
       <SettingItem>
-        <Button l10nId='syncNewDevice' className='whiteButton' onClick={this.props.showOverlay.bind(this, 'syncNewDevice')} />
+        <Button l10nId='syncNewDevice' className='primaryButton' onClick={this.props.showOverlay.bind(this, 'syncNewDevice')} />
       </SettingItem>
     </SettingsList>
+  }
+
+  get devices () {
+    let devices = []
+    this.props.syncData.get('devices').forEach((device, id) => {
+      devices.push({id, name: device.name, lastFetchTimestamp: device.lastFetchTimestamp})
+    })
+    return devices
+  }
+
+  get devicesContent () {
+    return <div className='devices'>
+      <div className='sectionTitle' data-l10n-id='syncDevices' data-test-id='syncDevices' />
+      <SortableTable
+        headings={['', 'syncDeviceName', 'syncDeviceLastActive']}
+        rows={this.props.syncData.get('devices').map((device, id) => [
+          {
+            html: '',
+            value: id
+          },
+          {
+            html: device.get('name'),
+            value: device.get('name')
+          },
+          {
+            html: new Date(device.get('lastRecordTimestamp')).toLocaleString(),
+            value: device.get('lastRecordTimestamp')
+          }
+        ])}
+        tableClassNames='devicesList'
+      />
+    </div>
   }
 
   get qrcodeContent () {

@@ -191,7 +191,8 @@ const applySyncRecord = (record) => {
       applySiteSettingRecord(record)
       break
     case 'device':
-      // TODO
+      require('../actions/appActions')
+        .saveSyncDevice(record.deviceId, record.device)
       break
     default:
       throw new Error(`Invalid record objectData: ${record.objectData}`)
